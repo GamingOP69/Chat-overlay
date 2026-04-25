@@ -64,7 +64,7 @@
     background: var(--surface); border: 1px solid var(--border);
     padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
   }
-  .logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50; box-shadow: 0 0 8px var(--accent); animation: blink 2s infinite; }
+  .logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: blink 2s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   h1 {
@@ -269,6 +269,27 @@
     margin-bottom: 12px; min-height: 60px;
     transition: all 0.2s;
   }
+
+  .url-stack {
+    display: grid;
+    gap: 10px;
+  }
+
+  .url-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(0,0,0,0.25);
+    padding: 10px;
+  }
+
+  .url-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
   .url-box:empty::before { content: 'Fill in at least one platform above…'; color: var(--muted); font-style: italic; }
 
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -407,9 +428,9 @@
     <!-- TWITCH -->
     <div class="platform-section active" id="section-twitch">
       <div class="field">
-        <label>Twitch Channel Username</label>
-        <input type="text" id="twitch" placeholder="e.g. ninja, shroud, xqc…" oninput="buildUrl()">
-        <div class="hint">✅ No API key needed — connects anonymously via Twitch IRC</div>
+        <label>Twitch Channel Usernames</label>
+        <input type="text" id="twitch" placeholder="e.g. ninja,shroud,xqc" oninput="buildUrl()">
+        <div class="hint">Use comma-separated channels to combine multiple Twitch chats in one overlay.</div>
       </div>
     </div>
 
@@ -417,14 +438,19 @@
     <div class="platform-section" id="section-youtube">
       <div class="field-group">
         <div class="field">
-          <label>YouTube Data API v3 Key</label>
-          <input type="text" id="yt_key" placeholder="AIzaSy…" oninput="buildUrl()">
-          <div class="hint">Get free at <strong>console.cloud.google.com</strong> → APIs & Services → YouTube Data API v3</div>
+          <label>YouTube Sources (Key|VideoID)</label>
+          <input type="text" id="yt_pairs" placeholder="AIza...|VIDEO_ID,AIza...|VIDEO_ID_2" oninput="buildUrl()">
+          <div class="hint">Add one or more pairs separated by commas. Format: API_KEY|VIDEO_ID</div>
         </div>
         <div class="field">
-          <label>Live Video ID</label>
-          <input type="text" id="yt_vid" placeholder="dQw4w9WgXcQ (from URL)" oninput="buildUrl()">
-          <div class="hint">Copy the ID after <code>?v=</code> in your YouTube live URL</div>
+          <label>Legacy YouTube Key (optional)</label>
+          <input type="text" id="yt_key" placeholder="AIzaSy…" oninput="buildUrl()">
+          <div class="hint">Backward compatibility mode if you still use a single source key/video below.</div>
+        </div>
+        <div class="field">
+          <label>Legacy Live Video ID (optional)</label>
+          <input type="text" id="yt_vid" placeholder="dQw4w9WgXcQ" oninput="buildUrl()">
+          <div class="hint">Legacy single-source mode. New setups should use the pairs field.</div>
         </div>
       </div>
     </div>
@@ -432,9 +458,9 @@
     <!-- KICK -->
     <div class="platform-section" id="section-kick">
       <div class="field">
-        <label>Kick Channel Username</label>
-        <input type="text" id="kick" placeholder="e.g. trainwreck, xqc…" oninput="buildUrl()">
-        <div class="hint">✅ No API key needed — connects via Kick's public WebSocket</div>
+        <label>Kick Channel Usernames</label>
+        <input type="text" id="kick" placeholder="e.g. trainwreck,xqc" oninput="buildUrl()">
+        <div class="hint">Use comma-separated channels to combine multiple Kick chats in one overlay.</div>
       </div>
     </div>
   </div>
@@ -554,6 +580,26 @@
         </div>
       </div>
 
+      <div class="field-row">
+        <div class="field">
+          <label>Overlay Mode</label>
+          <select id="mode" onchange="buildUrl()">
+            <option value="all">All (chat + events + goals)</option>
+            <option value="chat">Chat Only</option>
+            <option value="events">Events Only</option>
+            <option value="goals">Goals Only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Layout Preset</label>
+          <select id="layout" onchange="buildUrl()">
+            <option value="stack">Compact Stack</option>
+            <option value="theater">Theater Alerts</option>
+            <option value="minimal">Minimal Sidebar</option>
+          </select>
+        </div>
+      </div>
+
       <div class="field">
         <label>Font Size — <span id="size-heading">14</span>px</label>
         <div class="range-wrap">
@@ -589,15 +635,92 @@
           <div class="toggle-thumb"></div>
         </label>
       </div>
+
+      <div class="toggle-field">
+        <div>
+          <div class="toggle-label">Enable Sound Effects</div>
+          <div class="toggle-desc">Plays alert tones for events (requires browser source audio enabled)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="sound" checked onchange="buildUrl()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <div class="field">
+        <label>Sound Volume — <span id="vol-heading">70</span>%</label>
+        <div class="range-wrap">
+          <input type="range" id="vol" min="0" max="100" value="70" oninput="rangeUpdate(this,'vol-heading','%'); rangeUpdate(this,'vol-value','%'); buildUrl()">
+          <div class="range-val" id="vol-value">70%</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="toggle-field">
+          <div>
+            <div class="toggle-label">Show Chat Messages</div>
+            <div class="toggle-desc">Turn off if you only want alerts/goals.</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="show_chat" checked onchange="buildUrl()">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="toggle-field">
+          <div>
+            <div class="toggle-label">Show Event Alerts</div>
+            <div class="toggle-desc">Subscriptions, raids, super chats, and milestones.</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="show_events" checked onchange="buildUrl()">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="toggle-field">
+        <div>
+          <div class="toggle-label">Show Goal Widget</div>
+          <div class="toggle-desc">Displays live counters (subs, raids, super chats, etc.)</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="show_goals" checked onchange="buildUrl()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
     </div>
   </div>
 
   <!-- OUTPUT URL -->
   <div class="card" id="output-card">
     <div class="card-title"><span class="icon">🔗</span> Your Browser Source URL</div>
-    <div class="url-box" id="url-out"></div>
+    <div class="url-stack">
+      <div class="url-item">
+        <div class="url-label">Primary URL (selected mode)</div>
+        <div class="url-box" id="url-out"></div>
+      </div>
+      <div class="url-item">
+        <div class="url-label">Chat Source URL</div>
+        <div class="url-box" id="url-chat"></div>
+      </div>
+      <div class="url-item">
+        <div class="url-label">Events Source URL</div>
+        <div class="url-box" id="url-events"></div>
+      </div>
+      <div class="url-item">
+        <div class="url-label">Goals Source URL</div>
+        <div class="url-box" id="url-goals"></div>
+      </div>
+    </div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="copyUrl()">📋 Copy URL</button>
+      <button class="btn btn-secondary" onclick="copyUrlById('url-chat')">Copy Chat URL</button>
+      <button class="btn btn-secondary" onclick="copyUrlById('url-events')">Copy Events URL</button>
+      <button class="btn btn-secondary" onclick="copyUrlById('url-goals')">Copy Goals URL</button>
       <button class="btn btn-secondary" onclick="openPreview()">👁️ Preview</button>
       <button class="btn btn-ghost" onclick="openDemo()">🎭 Demo Mode</button>
     </div>
@@ -612,6 +735,18 @@
       <div class="step"><div class="step-num">3</div><div class="step-text">Paste your generated URL into the <strong>URL field</strong></div></div>
       <div class="step"><div class="step-num">4</div><div class="step-text">Set Width: <strong>400</strong>, Height: <strong>800</strong> (or full canvas). Enable <strong>"Custom CSS"</strong> → add <code>body { background: transparent !important; }</code> if needed</div></div>
       <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>OK</strong> — chat appears on your stream! 🎉 Drag to position it anywhere.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🧩</span> Custom Platform Bridge</div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.7;margin-bottom:10px">
+      For platforms beyond Twitch, YouTube, and Kick, you can push messages into the overlay via <code>window.postMessage()</code>.
+      Send <code>{ kind: 'chat' | 'event', platform, user, text, ... }</code> from any browser source page on the same scene.
+    </p>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;color:var(--text);line-height:1.6">
+      <strong style="color:var(--accent2)">Example:</strong><br>
+      <code>window.postMessage({ kind:'event', platform:'tiktok', user:'viewer42', eventTitle:'Gift', eventSubtitle:'Sent a rose' }, '*')</code>
     </div>
   </div>
 
@@ -657,6 +792,29 @@
 let selectedTheme = 'neon';
 let currentTab = 'twitch';
 
+function cleanList(value) {
+  return String(value || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function parseYouTubePairs(value) {
+  return String(value || '')
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const splitIndex = part.indexOf('|');
+      if (splitIndex <= 0) return null;
+      const key = part.slice(0, splitIndex).trim();
+      const vid = part.slice(splitIndex + 1).trim();
+      if (!key || !vid) return null;
+      return `${key}|${vid}`;
+    })
+    .filter(Boolean);
+}
+
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
@@ -694,37 +852,67 @@ function buildUrl() {
   const base = getOverlayBaseUrl();
   const p = new URLSearchParams();
 
-  const twitch = document.getElementById('twitch').value.trim();
+  const twitch = cleanList(document.getElementById('twitch').value.trim());
   const yt_key = document.getElementById('yt_key').value.trim();
   const yt_vid = document.getElementById('yt_vid').value.trim();
-  const kick   = document.getElementById('kick').value.trim();
+  const ytPairs = parseYouTubePairs(document.getElementById('yt_pairs').value.trim());
+  const kick   = cleanList(document.getElementById('kick').value.trim());
   const avatar = document.getElementById('avatar').value.trim();
 
-  if (twitch)         p.set('twitch', twitch);
+  if (twitch.length > 0) p.set('twitch', twitch.join(','));
   if (yt_key)         p.set('yt_key', yt_key);
   if (yt_vid)         p.set('yt_vid', yt_vid);
-  if (kick)           p.set('kick', kick);
+  if (ytPairs.length > 0) p.set('yt', ytPairs.join(','));
+  if (kick.length > 0) p.set('kick', kick.join(','));
   if (avatar)         p.set('avatar', avatar);
 
   p.set('theme', selectedTheme);
   p.set('anim',  document.getElementById('anim').value);
   p.set('pos',   document.getElementById('pos').value);
+  p.set('mode',  document.getElementById('mode').value);
+  p.set('layout', document.getElementById('layout').value);
   p.set('size',  document.getElementById('size').value);
   p.set('dur',   document.getElementById('dur').value);
   p.set('max',   document.getElementById('max').value);
+  p.set('vol',   document.getElementById('vol').value);
   if (!document.getElementById('status').checked) p.set('status', '0');
+  if (!document.getElementById('sound').checked) p.set('sound', '0');
+  if (!document.getElementById('show_chat').checked) p.set('chat', '0');
+  if (!document.getElementById('show_events').checked) p.set('events', '0');
+  if (!document.getElementById('show_goals').checked) p.set('goals', '0');
 
-  const hasSource = twitch || (yt_key && yt_vid) || kick;
+  const hasLegacyYt = yt_key && yt_vid;
+  const hasSource = twitch.length > 0 || ytPairs.length > 0 || hasLegacyYt || kick.length > 0;
   const urlEl = document.getElementById('url-out');
+  const chatEl = document.getElementById('url-chat');
+  const eventsEl = document.getElementById('url-events');
+  const goalsEl = document.getElementById('url-goals');
+
+  const makeModeUrl = (mode) => {
+    const modeParams = new URLSearchParams(p);
+    modeParams.set('mode', mode);
+    return `${base}?${modeParams.toString()}`;
+  };
+
   if (hasSource) {
-    urlEl.textContent = base + '?' + p.toString();
+    urlEl.textContent = `${base}?${p.toString()}`;
+    chatEl.textContent = makeModeUrl('chat');
+    eventsEl.textContent = makeModeUrl('events');
+    goalsEl.textContent = makeModeUrl('goals');
   } else {
     urlEl.textContent = '';
+    chatEl.textContent = '';
+    eventsEl.textContent = '';
+    goalsEl.textContent = '';
   }
 }
 
 function copyUrl() {
-  const url = document.getElementById('url-out').textContent;
+  copyUrlById('url-out');
+}
+
+function copyUrlById(id) {
+  const url = document.getElementById(id).textContent;
   if (!url) { alert('Fill in at least one platform first!'); return; }
   const showToast = () => {
     const t = document.getElementById('toast');
@@ -766,14 +954,25 @@ function openPreview() {
 
 function openDemo() {
   const base = getOverlayBaseUrl();
-  const p = new URLSearchParams({ demo: '1', theme: selectedTheme,
+  const p = new URLSearchParams({
+    demo: '1',
+    theme: selectedTheme,
     anim: document.getElementById('anim').value,
     pos:  document.getElementById('pos').value,
+    mode: document.getElementById('mode').value,
+    layout: document.getElementById('layout').value,
     size: document.getElementById('size').value,
     dur:  document.getElementById('dur').value,
-    max:  document.getElementById('max').value });
+    max:  document.getElementById('max').value,
+    vol:  document.getElementById('vol').value,
+  });
   const avatar = document.getElementById('avatar').value.trim();
   if (avatar) p.set('avatar', avatar);
+  if (!document.getElementById('status').checked) p.set('status', '0');
+  if (!document.getElementById('sound').checked) p.set('sound', '0');
+  if (!document.getElementById('show_chat').checked) p.set('chat', '0');
+  if (!document.getElementById('show_events').checked) p.set('events', '0');
+  if (!document.getElementById('show_goals').checked) p.set('goals', '0');
   window.open(base + '?' + p.toString(), '_blank');
 }
 
