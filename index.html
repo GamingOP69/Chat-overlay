@@ -255,6 +255,40 @@
   }
   .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
 
+  .source-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 680px) { .source-grid { grid-template-columns: 1fr; } }
+  .source-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)), var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+  }
+  .source-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+  .source-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .source-link {
+    display: inline-flex;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.06);
+    color: var(--accent2);
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .source-link:hover { background: rgba(255,255,255,0.1); }
+
   /* ── OUTPUT ─────────────────────────────────── */
   #output-card {
     background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,182,212,0.07));
@@ -451,6 +485,34 @@
     </div>
   </div>
 
+  <!-- AUDIO / SOURCE OPTIONS -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🔊</span> Audio & Extra Sources</div>
+    <div class="field-group">
+      <div class="toggle-field">
+        <div>
+          <div class="toggle-label">Enable Sound Effects</div>
+          <div class="toggle-desc">Plays arcade-style cues for chat, alerts, and platform events</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="sound" checked onchange="buildUrl()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="field">
+        <label>Sound Volume — <span id="volume-heading">45</span>%</label>
+        <div class="range-wrap">
+          <input type="range" id="volume" min="0" max="100" value="45" oninput="rangeUpdate(this,'volume-heading','%'); rangeUpdate(this,'volume-value','%'); buildUrl()">
+          <div class="range-val" id="volume-value">45</div>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.6">
+        Use the chat URL for message overlays. If you want a separate browser source for YouTube live channel stats, open the stats source button below after adding your YouTube API key and live video ID.
+      </p>
+    </div>
+  </div>
+
   <!-- APPEARANCE -->
   <div class="card">
     <div class="card-title"><span class="icon">🎨</span> Appearance</div>
@@ -600,6 +662,23 @@
       <button class="btn btn-primary" onclick="copyUrl()">📋 Copy URL</button>
       <button class="btn btn-secondary" onclick="openPreview()">👁️ Preview</button>
       <button class="btn btn-ghost" onclick="openDemo()">🎭 Demo Mode</button>
+      <button class="btn btn-secondary" onclick="openStats()">📊 Stats Source</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📡</span> Extra Browser Sources</div>
+    <div class="source-grid">
+      <div class="source-card">
+        <h3>YouTube Live Stats</h3>
+        <p>Shows a compact channel card with subscribers, channel views, and live viewer count using the YouTube API.</p>
+        <a href="#" class="source-link" onclick="openStats(); return false;">Open YouTube Stats</a>
+      </div>
+      <div class="source-card">
+        <h3>Chat Overlay</h3>
+        <p>Use the generated browser source URL for the main gaming chat overlay with platform badges, avatars, mentions, links, and event cards.</p>
+        <a href="#" class="source-link" onclick="openPreview(); return false;">Open Chat Overlay</a>
+      </div>
     </div>
   </div>
 
@@ -699,12 +778,16 @@ function buildUrl() {
   const yt_vid = document.getElementById('yt_vid').value.trim();
   const kick   = document.getElementById('kick').value.trim();
   const avatar = document.getElementById('avatar').value.trim();
+  const sound = document.getElementById('sound').checked;
+  const volume = document.getElementById('volume').value.trim();
 
   if (twitch)         p.set('twitch', twitch);
   if (yt_key)         p.set('yt_key', yt_key);
   if (yt_vid)         p.set('yt_vid', yt_vid);
   if (kick)           p.set('kick', kick);
   if (avatar)         p.set('avatar', avatar);
+  if (!sound)         p.set('sound', '0');
+  p.set('volume', volume || '45');
 
   p.set('theme', selectedTheme);
   p.set('anim',  document.getElementById('anim').value);
@@ -721,6 +804,34 @@ function buildUrl() {
   } else {
     urlEl.textContent = '';
   }
+}
+
+function buildStatsUrl() {
+  const base = getOverlayBaseUrl();
+  const p = new URLSearchParams();
+  const yt_key = document.getElementById('yt_key').value.trim();
+  const yt_vid = document.getElementById('yt_vid').value.trim();
+  const avatar = document.getElementById('avatar').value.trim();
+
+  if (!yt_key || !yt_vid) {
+    alert('For YouTube stats, fill in the YouTube API key and live video ID first.');
+    return '';
+  }
+
+  p.set('stats', '1');
+  p.set('yt_key', yt_key);
+  p.set('yt_vid', yt_vid);
+  p.set('theme', selectedTheme);
+  p.set('anim', document.getElementById('anim').value);
+  p.set('pos', document.getElementById('pos').value);
+  p.set('size', document.getElementById('size').value);
+  p.set('dur', document.getElementById('dur').value);
+  p.set('max', document.getElementById('max').value);
+  const volume = document.getElementById('volume').value.trim();
+  p.set('volume', volume || '45');
+  if (avatar) p.set('avatar', avatar);
+
+  return `${base}?${p.toString()}`;
 }
 
 function copyUrl() {
@@ -775,6 +886,11 @@ function openDemo() {
   const avatar = document.getElementById('avatar').value.trim();
   if (avatar) p.set('avatar', avatar);
   window.open(base + '?' + p.toString(), '_blank');
+}
+
+function openStats() {
+  const url = buildStatsUrl();
+  if (url) window.open(url, '_blank');
 }
 
 buildUrl();
