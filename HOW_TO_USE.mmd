@@ -1,0 +1,61 @@
+# How To Use
+
+```mermaid
+flowchart TD
+  A[Open index.html] --> B[Choose Twitch, YouTube, Kick, or Demo]
+  B --> C[Set theme, animation, size, duration, and max messages]
+  C --> D[Copy the generated overlay URL]
+  D --> E[Paste URL into OBS or Streamlabs Browser Source]
+  E --> F[Load overlay.html]
+  F --> G[Messages render live]
+```
+
+```mermaid
+flowchart LR
+  subgraph Setup
+    S1[index.html]
+    S2[Build URL]
+    S3[Copy / Preview / Demo]
+  end
+
+  subgraph Runtime
+    R1[overlay.html]
+    R2[Connect to platform]
+    R3[Queue messages]
+    R4[Render cards]
+  end
+
+  S1 --> S2 --> S3 --> R1 --> R2 --> R3 --> R4
+```
+
+## URL Examples
+
+```text
+overlay.html?twitch=ninja&theme=neon&anim=slide&pos=right&size=14&dur=25&max=20
+overlay.html?yt_key=YOUR_KEY&yt_vid=VIDEO_ID&theme=cyber&anim=float
+overlay.html?kick=trainwreck&avatar=https://example.com/logo.png&demo=0
+overlay.html?demo=1&theme=mono&status=0
+```
+
+## OBS Steps
+
+1. Host the files on GitHub Pages, Netlify, Vercel, or another static host.
+2. Open `index.html` and generate the overlay URL.
+3. Add a Browser Source in OBS.
+4. Paste the URL.
+5. Set a resolution that gives the chat room enough room to breathe.
+6. Use the transparent CSS fallback if needed.
+
+## Behavior Summary
+
+- Twitch connects anonymously over IRC WebSocket.
+- YouTube polls the live chat API using your API key.
+- Kick subscribes to the channel chat WebSocket.
+- Demo mode cycles through example messages so you can test the design without a live source.
+
+## Notes
+
+- The overlay is static and does not need a build step.
+- Message cards expire automatically after the configured duration.
+- The visible message count is capped so the overlay stays readable.
+- Platform badges and event cards are generated from the payload when the platform exposes that data.
