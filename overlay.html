@@ -10,13 +10,13 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --accent: #a855f7;
-    --accent2: #06b6d4;
-    --glow: rgba(168,85,247,0.4);
-    --glow2: rgba(6,182,212,0.3);
-    --msg-bg: rgba(10,10,20,0.75);
-    --msg-border: rgba(255,255,255,0.08);
-    --text: #e2e8f0;
+    --accent: #c084fc;
+    --accent2: #22d3ee;
+    --glow: rgba(192,132,252,0.45);
+    --glow2: rgba(34,211,238,0.32);
+    --msg-bg: rgba(7,10,18,0.82);
+    --msg-border: rgba(255,255,255,0.09);
+    --text: #f1f5f9;
     --sub-text: #94a3b8;
     --font-size: 14px;
     --border-radius: 12px;
@@ -29,24 +29,24 @@
 
   /* ── THEMES ─────────────────────────────── */
   body.theme-neon {
-    --accent: #f0abfc; --accent2: #67e8f9;
-    --glow: rgba(240,171,252,0.5); --glow2: rgba(103,232,249,0.4);
-    --msg-bg: rgba(5,5,15,0.82);
+    --accent: #f5a3ff; --accent2: #67e8f9;
+    --glow: rgba(245,163,255,0.62); --glow2: rgba(103,232,249,0.42);
+    --msg-bg: rgba(4,4,12,0.9);
   }
   body.theme-fire {
-    --accent: #fb923c; --accent2: #fbbf24;
-    --glow: rgba(251,146,60,0.5); --glow2: rgba(251,191,36,0.4);
-    --msg-bg: rgba(15,5,0,0.82);
+    --accent: #ff8a4c; --accent2: #fbbf24;
+    --glow: rgba(255,138,76,0.62); --glow2: rgba(251,191,36,0.42);
+    --msg-bg: rgba(18,7,2,0.9);
   }
   body.theme-ocean {
     --accent: #34d399; --accent2: #38bdf8;
-    --glow: rgba(52,211,153,0.45); --glow2: rgba(56,189,248,0.35);
-    --msg-bg: rgba(0,10,20,0.8);
+    --glow: rgba(52,211,153,0.56); --glow2: rgba(56,189,248,0.38);
+    --msg-bg: rgba(0,10,20,0.88);
   }
   body.theme-rose {
-    --accent: #f472b6; --accent2: #fb7185;
-    --glow: rgba(244,114,182,0.5); --glow2: rgba(251,113,133,0.4);
-    --msg-bg: rgba(15,0,10,0.8);
+    --accent: #fb5da8; --accent2: #fb7185;
+    --glow: rgba(251,93,168,0.56); --glow2: rgba(251,113,133,0.4);
+    --msg-bg: rgba(16,0,10,0.88);
   }
   body.theme-glass {
     --accent: #c7d2fe; --accent2: #a5f3fc;
@@ -61,10 +61,10 @@
     --msg-border: rgba(255,255,255,0.05);
   }
   body.theme-cyber {
-    --accent: #7cfc98; --accent2: #22d3ee;
-    --glow: rgba(124,252,152,0.45); --glow2: rgba(34,211,238,0.3);
-    --msg-bg: rgba(5,8,22,0.86);
-    --msg-border: rgba(124,252,152,0.14);
+    --accent: #7dff9c; --accent2: #22d3ee;
+    --glow: rgba(125,255,156,0.6); --glow2: rgba(34,211,238,0.34);
+    --msg-bg: rgba(5,8,22,0.92);
+    --msg-border: rgba(125,255,156,0.18);
   }
   body.theme-sunset {
     --accent: #fb7185; --accent2: #fbbf24;
@@ -104,24 +104,29 @@
   .msg {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    background: var(--msg-bg);
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)), var(--msg-bg);
     border: 1px solid var(--msg-border);
-    border-radius: var(--border-radius);
-    padding: 8px 10px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 9px 11px;
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
     position: relative;
     overflow: hidden;
-    border-left: 3px solid var(--user-color, var(--accent));
+    border-left: 4px solid var(--user-color, var(--accent));
     box-shadow:
-      0 4px 24px rgba(0,0,0,0.4),
-      0 0 0 0.5px rgba(255,255,255,0.04),
-      inset 0 1px 0 rgba(255,255,255,0.06);
+      0 10px 28px rgba(0,0,0,0.48),
+      0 0 0 1px rgba(255,255,255,0.04),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 0 18px rgba(0,0,0,0.12);
     max-width: var(--max-width);
     will-change: transform, opacity;
     transition: opacity 0.5s ease, transform 0.25s ease, filter 0.25s ease;
   }
+  .msg.twitch { border-left-color: #9147ff; }
+  .msg.youtube { border-left-color: #ff0000; }
+  .msg.kick { border-left-color: #53b94f; }
+  .msg.event { border-left-color: var(--accent2); }
 
   /* shimmer line */
   .msg::after {
@@ -130,6 +135,13 @@
     top: 0; left: -100%; width: 60%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
     animation: shimmer 3s ease infinite;
+  }
+  .msg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 14%);
+    pointer-events: none;
   }
 
   /* ── ANIMATIONS ───────────────────────────── */
@@ -184,7 +196,7 @@
     font-size: 13px;
     color: #fff;
     background: linear-gradient(135deg, var(--user-color, var(--accent)), var(--user-color, var(--accent2)));
-    box-shadow: 0 0 10px var(--user-color, var(--glow)), inset 0 1px 0 rgba(255,255,255,0.12);
+    box-shadow: 0 0 14px var(--user-color, var(--glow)), inset 0 1px 0 rgba(255,255,255,0.14);
     text-transform: uppercase;
     letter-spacing: 0;
     position: relative;
@@ -252,13 +264,26 @@
   .msg-text {
     color: var(--text);
     font-size: var(--font-size);
-    line-height: 1.45;
+    line-height: 1.48;
     word-break: break-word;
     overflow-wrap: anywhere;
   }
   .msg-text img.emote {
     height: 24px; vertical-align: middle;
     display: inline-block; margin: 0 1px;
+  }
+  .msg-text .chat-link {
+    color: #8be9fd;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(139, 233, 253, 0.36);
+  }
+  .msg-text .chat-link:hover { color: #d6fbff; border-bottom-color: currentColor; }
+  .msg-text .mention {
+    color: #ffd7f5;
+    background: rgba(249, 168, 212, 0.16);
+    padding: 0 4px;
+    border-radius: 999px;
+    font-weight: 700;
   }
 
   /* ── SOURCE LOGO ────────────────────────── */
@@ -269,13 +294,13 @@
 
   /* ── SYSTEM EVENTS ──────────────────────── */
   .msg.event {
-    background: linear-gradient(135deg, rgba(168,85,247,0.18), rgba(6,182,212,0.11));
+    background: linear-gradient(135deg, rgba(192,132,252,0.2), rgba(34,211,238,0.12));
     border-left-color: var(--accent2);
-    border-color: rgba(168,85,247,0.2);
+    border-color: rgba(192,132,252,0.22);
     padding: 11px 12px;
     box-shadow:
-      0 8px 30px rgba(0,0,0,0.48),
-      0 0 24px rgba(168,85,247,0.16),
+      0 12px 36px rgba(0,0,0,0.52),
+      0 0 26px rgba(192,132,252,0.18),
       inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .msg.event .msg-content {
@@ -363,12 +388,64 @@
     border-radius: 4px; font-family: monospace; font-size: 11px;
     color: var(--accent2);
   }
+
+  #stats-wrap {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 18px;
+    pointer-events: none;
+  }
+  .stats-panel {
+    width: min(360px, calc(100vw - 36px));
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, rgba(8, 10, 18, 0.95), rgba(20, 10, 24, 0.9));
+    box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.03) inset;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 14px;
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .stats-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent 40%);
+    pointer-events: none;
+  }
+  .stats-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .stats-mark {
+    width: 38px; height: 38px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 0 20px var(--glow);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .stats-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.1; }
+  .stats-subtitle { color: var(--sub-text); font-size: 12px; margin-top: 2px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .stats-metric {
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    padding: 10px 12px;
+  }
+  .stats-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sub-text); margin-bottom: 6px; }
+  .stats-value { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; color: #fff; line-height: 1; }
+  .stats-note { margin-top: 10px; color: var(--sub-text); font-size: 11px; line-height: 1.5; }
 </style>
 </head>
 <body>
 
 <div id="status"><div class="dot" id="dot"></div><span id="status-text">Connecting…</span></div>
 <div id="chat-wrap"></div>
+<div id="stats-wrap"></div>
 <div id="guide" style="display:none">
   <h2>🎙️ StreamChat Overlay</h2>
   <p>Open <code>index.html</code> to configure your overlay</p>
@@ -391,19 +468,27 @@ const MAX_MSG = Number.parseInt(params.get('max') || '20', 10);
 const MSG_DUR = Number.parseInt(params.get('dur') || '25', 10) * 1000;
 const SHOW_ST = params.get('status') !== '0';
 const DEMO = params.get('demo') === '1';
+const SOUND = params.get('sound') !== '0';
+const SOUND_VOLUME = Math.min(1, Math.max(0, Number.parseFloat(params.get('volume') || '0.45')));
+const STATS_VIEW = params.get('stats') === '1';
 
 document.body.classList.add(`theme-${THEME}`, `anim-${ANIM}`, `pos-${POS}`);
 document.documentElement.style.setProperty('--font-size', `${Number.isFinite(FSIZE) ? FSIZE : 14}px`);
 
 const wrap = document.getElementById('chat-wrap');
+const statsWrap = document.getElementById('stats-wrap');
 const dot = document.getElementById('dot');
 const stEl = document.getElementById('status-text');
 const guide = document.getElementById('guide');
 const statusEl = document.getElementById('status');
 
 if (SHOW_ST) statusEl.classList.add('visible');
+if (STATS_VIEW) {
+  wrap.style.display = 'none';
+  statsWrap.style.display = 'flex';
+}
 
-const hasSource = Boolean(TWITCH || (YT_KEY && YT_VID) || KICK || DEMO);
+const hasSource = Boolean(TWITCH || (YT_KEY && YT_VID) || KICK || DEMO || STATS_VIEW);
 if (!hasSource) guide.style.display = 'flex';
 
 const BADGE_SVG = {
@@ -464,6 +549,10 @@ function firstHttpUrl(...values) {
   return values.find((value) => isHttpUrl(value)) || '';
 }
 
+function escAttr(value) {
+  return escHtml(value).replace(/`/g, '&#96;');
+}
+
 function getInitials(name) {
   const parts = String(name || 'U').trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return 'U';
@@ -516,6 +605,119 @@ function buildEventMessage(base, details) {
     text: details.subtitle || base.text || '',
     isEvent: true,
   };
+}
+
+let audioContext = null;
+function ensureAudioContext() {
+  if (!SOUND) return null;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!audioContext) audioContext = new AudioContextClass();
+  if (audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
+  return audioContext;
+}
+
+function playCue(kind = 'message') {
+  const context = ensureAudioContext();
+  if (!context) return;
+
+  const palettes = {
+    twitch: {
+      message: { wave: 'triangle', steps: [620, 780], duration: 0.09, gain: 0.03 },
+      event: { wave: 'sawtooth', steps: [340, 520, 760], duration: 0.14, gain: 0.045 },
+    },
+    youtube: {
+      message: { wave: 'sine', steps: [740, 920], duration: 0.08, gain: 0.028 },
+      event: { wave: 'sine', steps: [520, 880, 620], duration: 0.16, gain: 0.042 },
+    },
+    kick: {
+      message: { wave: 'square', steps: [500, 660], duration: 0.07, gain: 0.026 },
+      event: { wave: 'square', steps: [260, 460, 220], duration: 0.15, gain: 0.05 },
+    },
+    generic: {
+      message: { wave: 'triangle', steps: [560, 700], duration: 0.08, gain: 0.03 },
+      event: { wave: 'sine', steps: [420, 740, 560], duration: 0.14, gain: 0.045 },
+    },
+  };
+
+  const [platform, state = 'message'] = String(kind).split(':');
+  const profile = (palettes[platform] || palettes.generic)[state] || palettes.generic.message;
+  const startAt = context.currentTime + 0.01;
+  const compressor = context.createDynamicsCompressor();
+  compressor.threshold.value = -24;
+  compressor.knee.value = 12;
+  compressor.ratio.value = 12;
+  compressor.attack.value = 0.001;
+  compressor.release.value = 0.15;
+  compressor.connect(context.destination);
+
+  profile.steps.forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const offset = startAt + (index * profile.duration * 0.55);
+    oscillator.type = profile.wave;
+    oscillator.frequency.setValueAtTime(frequency, offset);
+    oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.18, offset + profile.duration);
+    gain.gain.setValueAtTime(0.0001, offset);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, profile.gain * SOUND_VOLUME), offset + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, offset + profile.duration);
+    oscillator.connect(gain);
+    gain.connect(compressor);
+    oscillator.start(offset);
+    oscillator.stop(offset + profile.duration + 0.02);
+  });
+}
+
+function platformLabel(platform) {
+  if (platform === 'youtube') return 'YouTube';
+  if (platform === 'twitch') return 'Twitch';
+  if (platform === 'kick') return 'Kick';
+  return platform || 'Chat';
+}
+
+function renderPlainSegment(segment) {
+  if (!segment) return '';
+  const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+  const mentionPattern = /(^|[^\w@])@([A-Za-z0-9_]{2,25})/g;
+  let html = '';
+  let cursor = 0;
+
+  while (cursor < segment.length) {
+    urlPattern.lastIndex = cursor;
+    const urlMatch = urlPattern.exec(segment);
+    if (!urlMatch) {
+      html += renderMentionChunk(segment.slice(cursor));
+      break;
+    }
+
+    html += renderMentionChunk(segment.slice(cursor, urlMatch.index));
+    const rawUrl = urlMatch[0];
+    const href = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
+    html += `<a class="chat-link" href="${escAttr(href)}" target="_blank" rel="noopener noreferrer">${escHtml(rawUrl)}</a>`;
+    cursor = urlMatch.index + rawUrl.length;
+  }
+
+  return html;
+
+  function renderMentionChunk(input) {
+    if (!input) return '';
+    let chunk = '';
+    let mentionCursor = 0;
+    while (mentionCursor < input.length) {
+      mentionPattern.lastIndex = mentionCursor;
+      const mentionMatch = mentionPattern.exec(input);
+      if (!mentionMatch) {
+        chunk += escHtml(input.slice(mentionCursor));
+        break;
+      }
+      chunk += escHtml(input.slice(mentionCursor, mentionMatch.index));
+      chunk += `${escHtml(mentionMatch[1])}<span class="mention">@${escHtml(mentionMatch[2])}</span>`;
+      mentionCursor = mentionMatch.index + mentionMatch[0].length;
+    }
+    return chunk;
+  }
 }
 
 const sourceStates = new Map();
@@ -700,6 +902,8 @@ function renderMessage({
     }, MSG_DUR);
   }
 
+  playCue(`${platform}:${isEvent ? 'event' : 'message'}`);
+
   return card;
 }
 
@@ -725,14 +929,116 @@ function renderText(text, emotes) {
 
   for (const range of ranges) {
     if (range.start < cursor) continue;
-    html += escHtml(rawText.slice(cursor, range.start));
+    html += renderPlainSegment(rawText.slice(cursor, range.start));
     const emoteText = rawText.slice(range.start, range.end + 1);
     html += `<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/${encodeURIComponent(range.id)}/default/dark/1.0" alt="${escHtml(emoteText)}" title="${escHtml(emoteText)}">`;
     cursor = range.end + 1;
   }
 
-  html += escHtml(rawText.slice(cursor));
+  html += renderPlainSegment(rawText.slice(cursor));
   return html;
+}
+
+function renderStatsCard({ platform, title, subtitle, metrics = [], note = '' }) {
+  statsWrap.innerHTML = '';
+  const panel = document.createElement('div');
+  panel.className = 'stats-panel';
+
+  const head = document.createElement('div');
+  head.className = 'stats-head';
+
+  const mark = document.createElement('div');
+  mark.className = 'stats-mark';
+  mark.innerHTML = PLATFORM_SVG[platform] || '★';
+  head.appendChild(mark);
+
+  const copy = document.createElement('div');
+  const titleEl = document.createElement('div');
+  titleEl.className = 'stats-title';
+  titleEl.textContent = title;
+  const subtitleEl = document.createElement('div');
+  subtitleEl.className = 'stats-subtitle';
+  subtitleEl.textContent = subtitle;
+  copy.appendChild(titleEl);
+  copy.appendChild(subtitleEl);
+  head.appendChild(copy);
+
+  panel.appendChild(head);
+
+  const grid = document.createElement('div');
+  grid.className = 'stats-grid';
+  metrics.forEach(({ label, value }) => {
+    const metric = document.createElement('div');
+    metric.className = 'stats-metric';
+    const metricLabel = document.createElement('div');
+    metricLabel.className = 'stats-label';
+    metricLabel.textContent = label;
+    const metricValue = document.createElement('div');
+    metricValue.className = 'stats-value';
+    metricValue.textContent = value;
+    metric.appendChild(metricLabel);
+    metric.appendChild(metricValue);
+    grid.appendChild(metric);
+  });
+  panel.appendChild(grid);
+
+  if (note) {
+    const noteEl = document.createElement('div');
+    noteEl.className = 'stats-note';
+    noteEl.textContent = note;
+    panel.appendChild(noteEl);
+  }
+
+  statsWrap.appendChild(panel);
+}
+
+async function loadYouTubeStats() {
+  if (!YT_KEY || !YT_VID) return;
+  setSourceState('youtube', 'YouTube', 'loading stats…', false);
+  try {
+    const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${encodeURIComponent(YT_VID)}&key=${encodeURIComponent(YT_KEY)}`);
+    const videoData = await videoResponse.json().catch(() => ({}));
+    const video = videoData.items?.[0] || null;
+    const channelId = video?.snippet?.channelId || '';
+    const channelTitle = video?.snippet?.channelTitle || 'YouTube Channel';
+    const liveData = video?.liveStreamingDetails || {};
+
+    let subscriberCount = 'Hidden';
+    let totalViews = '—';
+    if (channelId) {
+      const channelResponse = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${encodeURIComponent(channelId)}&key=${encodeURIComponent(YT_KEY)}`);
+      const channelData = await channelResponse.json().catch(() => ({}));
+      const channel = channelData.items?.[0] || null;
+      subscriberCount = channel?.statistics?.hiddenSubscriberCount ? 'Hidden' : Number(channel?.statistics?.subscriberCount || 0).toLocaleString();
+      totalViews = Number(channel?.statistics?.viewCount || 0).toLocaleString();
+    }
+
+    renderStatsCard({
+      platform: 'youtube',
+      title: channelTitle,
+      subtitle: liveData.activeLiveChatId ? 'Live chat connected' : 'Channel stats',
+      metrics: [
+        { label: 'Subscribers', value: subscriberCount },
+        { label: 'Channel Views', value: totalViews },
+        { label: 'Live Viewers', value: liveData.concurrentViewers || '—' },
+        { label: 'Stream', value: video?.snippet?.liveBroadcastContent || 'live' },
+      ],
+      note: 'YouTube stats use the channel and live-stream metadata returned by the Data API.',
+    });
+    setSourceState('youtube', 'YouTube', 'stats ready', true);
+  } catch {
+    renderStatsCard({
+      platform: 'youtube',
+      title: 'YouTube Channel Stats',
+      subtitle: 'Unable to load stats',
+      metrics: [
+        { label: 'Subscribers', value: '—' },
+        { label: 'Live Viewers', value: '—' },
+      ],
+      note: 'Check the API key and live video ID, or use chat mode instead.',
+    });
+    setSourceState('youtube', 'YouTube', 'stats unavailable', false);
+  }
 }
 
 function buildTwitchEventMessage(tags, displayName) {
@@ -1084,6 +1390,7 @@ if (DEMO) runDemo();
 if (TWITCH) connectTwitch(TWITCH);
 if (YT_KEY && YT_VID) connectYouTube(YT_VID, YT_KEY);
 if (KICK) connectKick(KICK);
+if (STATS_VIEW) loadYouTubeStats();
 if (!hasSource && !DEMO) refreshStatus();
 </script>
 </body>
