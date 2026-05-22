@@ -660,9 +660,12 @@
     <div class="url-box" id="url-out"></div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="copyUrl()">📋 Copy URL</button>
+      <button class="btn btn-secondary" onclick="copyUrlForMode('chat')">📋 Copy Chat</button>
+      <button class="btn btn-secondary" onclick="copyUrlForMode('stats')">📋 Copy Stats</button>
       <button class="btn btn-secondary" onclick="openPreview()">👁️ Preview</button>
       <button class="btn btn-ghost" onclick="openDemo()">🎭 Demo Mode</button>
-      <button class="btn btn-secondary" onclick="openStats()">📊 Stats Source</button>
+      <button class="btn btn-ghost" onclick="openDemoMode('stats')">🎭 Demo Stats</button>
+      <button class="btn btn-secondary" onclick="openPreviewMode('stats')">📊 Stats Source</button>
     </div>
   </div>
 
@@ -769,10 +772,8 @@ function getOverlayBaseUrl() {
   return new URL('overlay.html', location.href).href;
 }
 
-function buildUrl() {
-  const base = getOverlayBaseUrl();
+function gatherParams() {
   const p = new URLSearchParams();
-
   const twitch = document.getElementById('twitch').value.trim();
   const yt_key = document.getElementById('yt_key').value.trim();
   const yt_vid = document.getElementById('yt_vid').value.trim();
@@ -797,7 +798,14 @@ function buildUrl() {
   p.set('max',   document.getElementById('max').value);
   if (!document.getElementById('status').checked) p.set('status', '0');
 
-  const hasSource = twitch || (yt_key && yt_vid) || kick;
+  return p;
+}
+
+function buildUrl() {
+  const base = getOverlayBaseUrl();
+  const p = gatherParams();
+  p.set('mode', 'all');
+  const hasSource = p.has('twitch') || (p.has('yt_key') && p.has('yt_vid')) || p.has('kick');
   const urlEl = document.getElementById('url-out');
   if (hasSource) {
     urlEl.textContent = base + '?' + p.toString();
@@ -808,30 +816,44 @@ function buildUrl() {
 
 function buildStatsUrl() {
   const base = getOverlayBaseUrl();
-  const p = new URLSearchParams();
+  const p = gatherParams();
   const yt_key = document.getElementById('yt_key').value.trim();
   const yt_vid = document.getElementById('yt_vid').value.trim();
-  const avatar = document.getElementById('avatar').value.trim();
-
   if (!yt_key || !yt_vid) {
     alert('For YouTube stats, fill in the YouTube API key and live video ID first.');
     return '';
   }
-
-  p.set('stats', '1');
+  p.set('mode', 'stats');
   p.set('yt_key', yt_key);
   p.set('yt_vid', yt_vid);
-  p.set('theme', selectedTheme);
-  p.set('anim', document.getElementById('anim').value);
-  p.set('pos', document.getElementById('pos').value);
-  p.set('size', document.getElementById('size').value);
-  p.set('dur', document.getElementById('dur').value);
-  p.set('max', document.getElementById('max').value);
-  const volume = document.getElementById('volume').value.trim();
-  p.set('volume', volume || '45');
-  if (avatar) p.set('avatar', avatar);
-
   return `${base}?${p.toString()}`;
+}
+
+function buildUrlForMode(mode) {
+  const base = getOverlayBaseUrl();
+  const p = gatherParams();
+  p.set('mode', mode || 'all');
+  return `${base}?${p.toString()}`;
+}
+
+function copyUrlForMode(mode) {
+  const url = buildUrlForMode(mode);
+  if (!url) { alert('Fill in at least one platform first!'); return; }
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }).catch(() => fallbackCopy(url, () => {}));
+    return;
+  }
+  fallbackCopy(url, () => {});
+}
+
+function openPreviewMode(mode) {
+  const url = buildUrlForMode(mode);
+  if (!url) { alert('Fill in at least one platform first!'); return; }
+  window.open(url, '_blank');
 }
 
 function copyUrl() {
@@ -885,6 +907,14 @@ function openDemo() {
     max:  document.getElementById('max').value });
   const avatar = document.getElementById('avatar').value.trim();
   if (avatar) p.set('avatar', avatar);
+  window.open(base + '?' + p.toString(), '_blank');
+}
+
+function openDemoMode(mode) {
+  const base = getOverlayBaseUrl();
+  const p = gatherParams();
+  p.set('demo', '1');
+  p.set('mode', mode || 'all');
   window.open(base + '?' + p.toString(), '_blank');
 }
 
