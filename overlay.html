@@ -470,7 +470,10 @@ const SHOW_ST = params.get('status') !== '0';
 const DEMO = params.get('demo') === '1';
 const SOUND = params.get('sound') !== '0';
 const SOUND_VOLUME = Math.min(1, Math.max(0, Number.parseFloat(params.get('volume') || '0.45')));
+const MODE = (params.get('mode') || 'all').toLowerCase();
 const STATS_VIEW = params.get('stats') === '1';
+const CHAT_MODE = MODE === 'all' || MODE === 'chat';
+const STATS_MODE = MODE === 'all' || MODE === 'stats' || STATS_VIEW;
 
 document.body.classList.add(`theme-${THEME}`, `anim-${ANIM}`, `pos-${POS}`);
 document.documentElement.style.setProperty('--font-size', `${Number.isFinite(FSIZE) ? FSIZE : 14}px`);
@@ -483,12 +486,11 @@ const guide = document.getElementById('guide');
 const statusEl = document.getElementById('status');
 
 if (SHOW_ST) statusEl.classList.add('visible');
-if (STATS_VIEW) {
-  wrap.style.display = 'none';
-  statsWrap.style.display = 'flex';
-}
+// mode handling: chat / stats / all
+if (!CHAT_MODE) wrap.style.display = 'none';
+if (STATS_MODE) statsWrap.style.display = 'flex';
 
-const hasSource = Boolean(TWITCH || (YT_KEY && YT_VID) || KICK || DEMO || STATS_VIEW);
+const hasSource = Boolean((CHAT_MODE && (TWITCH || (YT_KEY && YT_VID) || KICK)) || (STATS_MODE && (YT_KEY && YT_VID)) || DEMO);
 if (!hasSource) guide.style.display = 'flex';
 
 const BADGE_SVG = {
@@ -1386,11 +1388,26 @@ function runDemo() {
   loop();
 }
 
+function renderStatsDemo() {
+  const title = 'Demo Channel';
+  const subtitle = 'Live — Demo Mode';
+  const metrics = [
+    { label: 'Subscribers', value: '12,345' },
+    { label: 'Channel Views', value: '1,234,567' },
+    { label: 'Live Viewers', value: '3,210' },
+    { label: 'Stream', value: 'demo' },
+  ];
+  renderStatsCard({ platform: 'youtube', title, subtitle, metrics, note: 'Demo stats — no API required' });
+  setSourceState('youtube', 'YouTube', 'demo stats', true);
+}
+
 if (DEMO) runDemo();
-if (TWITCH) connectTwitch(TWITCH);
-if (YT_KEY && YT_VID) connectYouTube(YT_VID, YT_KEY);
-if (KICK) connectKick(KICK);
-if (STATS_VIEW) loadYouTubeStats();
+if (CHAT_MODE) {
+  if (TWITCH) connectTwitch(TWITCH);
+  if (YT_KEY && YT_VID) connectYouTube(YT_VID, YT_KEY);
+  if (KICK) connectKick(KICK);
+}
+if (STATS_MODE) loadYouTubeStats();
 if (!hasSource && !DEMO) refreshStatus();
 </script>
 </body>
