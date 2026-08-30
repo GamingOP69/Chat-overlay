@@ -1,168 +1,216 @@
-# StreamChat Overlay — Pro Gamer HUD Engine
+# StreamChat Overlay
 
-<div align="center">
+High-performance, zero-dependency stream chat HUD engine engineered for OBS Studio, Streamlabs, and browser sources. Supports simultaneous multi-platform ingestion across Twitch, YouTube Live, and Kick with hardware-accelerated rendering and procedural Web Audio synthesis.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Platforms: Twitch | YouTube | Kick](https://img.shields.io/badge/Platforms-Twitch%20|%20YouTube%20|%20Kick-9147ff.svg?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
-[![Stack: Zero Dependencies](https://img.shields.io/badge/Stack-Zero%20Dependencies%20(HTML5%2FCSS3%2FJS)-00f0ff.svg?style=for-the-badge)](https://developer.mozilla.org)
-[![Performance: 60 FPS GPU Accelerated](https://img.shields.io/badge/Performance-60%20FPS%20GPU%20Accelerated-53b94f.svg?style=for-the-badge)](https://obsproject.com)
-
-<p align="center">
-  <b>A zero-dependency, ultra-low-latency, multi-platform stream chat overlay engineered for pro gamers and content creators on OBS Studio, Streamlabs, and Prism Live.</b>
-</p>
-
-</div>
-
----
-
-## ⚡ Key Highlights
-
-- **Pure Static Architecture:** Zero Node.js runtime, zero npm dependencies, zero build pipeline. Deploy instantly to GitHub Pages, Netlify, Vercel, Cloudflare, or local files.
-- **Simultaneous Multi-Platform Chat:** Connect concurrently to **Twitch (Anonymous IRC WebSocket)**, **YouTube Live (Data API v3)**, and **Kick (Pusher WebSocket)** to unify your cross-platform audience into a single synchronized HUD feed.
-- **60+ Offline Gamer Emotes + 7TV / BTTV / FFZ:** Built-in dictionary of 60+ top streamer emotes (`KEKW`, `OMEGALUL`, `catJAM`, `Pog`, `monkaW`, `pepeL`, `ICANT`, `AYAYA`, `GIGACHAD`, `Copium`, `widepeepoHappy`, `PogChamp`, `Kappa`, `LUL`, etc.) for zero-latency rendering, plus live async fetching for 7TV Global/Twitch, BTTV Global, and FrankerFaceZ Global sets.
-- **BigEmote Auto-Scaling:** Messages containing only 1–3 emotes automatically scale to **1.8x** size (Twitch/Kick native behavior).
-- **10 Pro Gamer HUD Themes:** Cyberpunk 2077, Valorant Tactical, OLED Stealth (Shroud/Tarik Minimal), Magma Forge (Apex Champion), Matrix Terminal, Synthwave 80s Outrun, Liquid Frosted Glass, Sakura Kawaii Anime, Hextech Arcane, and Pure Floating Contour.
-- **Hardware-Accelerated 60fps Animations:** Smooth GPU-rendered Chromatic Glitch, Tactical Spring Slide, Elastic Pop, Silky Fade, Cinematic Float, and Zoom Snap with smooth height-collapse exit transitions.
-- **Multi-Tier Event Alerts:** Animated alert cards for Twitch Subscriptions & Resubs, 5x Community Gift Sub Bombs, 500-viewer Raids, Bits/Cheers, YouTube Channel Memberships, and color-coded YouTube SuperChats ($2, $5, $10, $20, $50, $100+ tiers).
-- **Card Opacity & High-Contrast Text Stroke:** Set card opacity from 100% solid HUD card down to 0% (pure transparent floating text) with customizable high-contrast text contour outline for 100% readability over high-action gameplay (snow maps, flashbangs, explosions).
-- **Interactive Command Deck & Live Preview:** Real-time reactive preview in `index.html` with zero-lag `postMessage` synchronization, multi-scenario stream test deck, soundboard, and localStorage autosave.
-- **Procedural Web Audio FM Synthesizer:** 6 custom synthesized sound FX profiles (`Cyber FM Blip`, `8-Bit Arcade Coin`, `Crystal Bell Chord`, `Tactical Radar Ping`, `Resonant Bubble Pop`, `Muted`) with volume control and safe AudioContext auto-resumption for OBS browser sources.
-- **Scrollback Buffer:** Pause auto-scroll when inspecting older messages with a clickable `↓ New Messages` badge.
-- **Security Hardened:** Strict `postMessage` origin and secret token validation to prevent unauthorized frame injection.
-
----
-
-## 🎮 10 Authentic Pro Gamer HUD Themes
-
-| Theme ID | Visual Aesthetic & Design Identity | Primary / Secondary Accent |
-|---|---|---|
-| `neon` | **Cyberpunk 2077 / Neo-Tokyo** with cyan/magenta glow, CRT scanlines & chromatic aberration | `#00f0ff` / `#ff007f` |
-| `valorant` | **Valorant / Tactical Sci-Fi** with sharp 45° chamfers, killfeed styling & high-contrast crimson | `#ff4655` / `#ece8e1` |
-| `stealth` | **OLED Stealth (Shroud / Tarik)** ultra-minimal, distraction-free monochrome design | `#ffffff` / `#a1a1aa` |
-| `fire` | **Magma Forge / Apex Champion** molten crimson & flame gold with animated ember pulses | `#ff3700` / `#ffaa00` |
-| `cyber` | **Matrix Terminal / Netrunner** phosphor green terminal with ASCII dashed borders | `#00ff66` / `#00f0ff` |
-| `synthwave` | **Outrun 80s Synthwave** sunset pink & gold gradient with retro glow | `#f43f5e` / `#fbbf24` |
-| `glass` | **Liquid Frosted Glass / VisionOS** 24px backdrop blur & specular inner highlights | `#ffffff` / `#94a3b8` |
-| `rose` | **Sakura Kawaii / Anime** soft pastel pink pill cards with bounce animation | `#fb7185` / `#f43f5e` |
-| `ocean` | **Hextech Arcane / Deep Abyssal** arcane rune blue & teal wave gradient | `#0ea5e9` / `#14b8a6` |
-| `floating` | **Pure Floating Contour** 0% background with 2px high-contrast black drop outline | `#ffffff` / `#00f0ff` |
-
-*Legacy theme aliases (`cyberpunk`, `tactical`, `magma`, `synthwave`, `matrix`, `frost`, `kawaii`, `hextech`, `minimal`, `pure`) are also fully supported.*
-
----
-
-## 🕹️ Visual & Streamer Controls
-
-- **Typography Options:** `Rajdhani` (Tactical Sci-Fi), `Chakra Petch` (Cyber Mecha), `Orbitron` (Futuristic Heavy), `Space Mono` (Terminal Code), `Inter` (Modern Crisp Clean), and `Press Start 2P` (8-Bit Arcade).
-- **Background Opacity:** Range from `0%` (pure floating text) to `100%` (solid HUD card).
-- **Text Stroke / Outline:** Enable high-contrast drop shadow and outline to guarantee crystal-clear readability over bright maps (snow, explosions, daylight).
-- **Chat Flow Direction:** `up` (standard bottom-up stream chat) or `down` (top-to-bottom waterfall list).
-- **Dock Placement:** `right` (bottom right), `left` (bottom left), `top-right`, or `top-left`.
-- **Emote Scaling:** Adjust emote scale from `20px` to `42px`.
-- **Message Duration:** Configurable lifetime (`5s` to `120s`), or set `dur=0` for **permanent** chat log mode.
-- **Toggles:** Show/hide avatars, timestamps (`[HH:MM]`), badges, and status indicator dot.
-
----
-
-## 🛠️ Complete URL Parameters Reference
-
-| Parameter | Type | Default | Example | Description |
-|---|---|---|---|---|
-| `twitch` | `string` | — | `tarik` | Twitch channel username (connects via anonymous IRC WebSocket). |
-| `yt_key` | `string` | — | `AIzaSy...` | YouTube Data API v3 key. |
-| `yt_vid` | `string` | — | `dQw4w9WgXcQ` | YouTube live stream video ID. |
-| `kick` | `string` | — | `xqc` | Kick channel username. |
-| `kick_id`| `string` | — | `123456` | Direct numeric Kick chatroom ID for 100% reliable Pusher connection. |
-| `avatar` | `string` | — | `https://.../logo.png` | Fallback streamer avatar/logo URL. |
-| `theme` | `string` | `neon` | `valorant` | Theme preset (`neon`, `valorant`, `stealth`, `fire`, `cyber`, `synthwave`, `glass`, `rose`, `ocean`, `floating`). |
-| `font` | `string` | `theme` | `chakra` | Font family override (`rajdhani`, `chakra`, `orbitron`, `space-mono`, `inter`, `press-start`). |
-| `opacity`| `number` | `90` | `0` | Card background opacity percentage (`0` = pure floating text, `100` = solid HUD card). |
-| `stroke` | `0\|1` | `0` | `1` | Enable high-contrast black text stroke / outline contour. |
-| `anim` | `string` | `glitch` | `slide` | Entry animation (`glitch`, `slide`, `pop`, `fade`, `float`, `zoom`). |
-| `pos` | `string` | `right` | `left` | Dock position (`right`, `left`, `top-right`, `top-left`). |
-| `dir` | `up\|down` | `up` | `down` | Chat flow direction (`up` = bottom-to-top, `down` = top-to-bottom waterfall). |
-| `size` | `number` | `14` | `16` | Base font size in pixels (`11` - `24`). |
-| `emote_size` | `number` | `26` | `32` | Emote display height in pixels (`20` - `42`). |
-| `dur` | `number` | `25` | `0` | Message lifetime in seconds (`0` = permanent / never expire). |
-| `max` | `number` | `20` | `30` | Maximum messages visible on screen simultaneously (`5` - `50`). |
-| `avatars`| `0\|1` | `1` | `0` | Show user profile avatars (`1` = visible, `0` = hidden / compact mode). |
-| `badges` | `0\|1` | `1` | `0` | Show platform and role badges (Sub, Mod, VIP, Broadcaster). |
-| `time` | `0\|1` | `0` | `1` | Show timestamp tags `[HH:MM]` on message cards. |
-| `status` | `0\|1` | `0` | `1` | Show live connection status indicator dot in top corner. |
-| `sound` | `0\|1` | `1` | `0` | Enable procedural synthesized sound FX on new messages and alerts. |
-| `sound_profile`| `string` | `cyber` | `coin` | Sound profile (`cyber`, `coin`, `chime`, `ping`, `pop`, `mute`). |
-| `volume` | `number` | `0.45` | `0.6` | Sound volume from `0.0` to `1.0`. |
-| `highlight`| `string` | — | `streamername`| Streamer username to illuminate with an animated golden border when mentioned. |
-| `filter` | `string` | — | `badword,spam` | Comma-separated list of banned words to silently filter out. |
-| `accent` | `hex` | — | `00f0ff` | Custom primary accent color override (automatically calculates glowing borders). |
-| `accent2`| `hex` | — | `ff007f` | Custom secondary accent color override. |
-| `custom_css`| `string`| — | `.msg{...}` | URL-encoded custom CSS stylesheet overrides. |
-| `secret` | `string` | — | `abc12345` | Security token to authenticate incoming `postMessage` test deck calls. |
-| `demo` | `0\|1` | `0` | `1` | Run demo mode with continuous simulated chats and hype alerts. |
-
----
-
-## 📺 Adding to OBS Studio / Streamlabs
-
-```text
-1. Open index.html in your browser and configure your platforms, theme, and font.
-2. Select your desired resolution preset:
-   • Sidebar: 420 x 850
-   • Bottom Bar: 850 x 250
-   • Compact: 320 x 500
-   • Full Screen: 1920 x 1080
-3. Click "Copy Overlay URL".
-4. In OBS Studio: Under Sources, click "+" -> "Browser".
-5. Name it "Stream Chat HUD".
-6. Paste your generated URL into the "URL" field.
-7. Set Width and Height to match your chosen resolution preset.
-8. Uncheck "Shutdown source when not visible" (ensures chat stays connected during scene switches).
-9. Click "OK" — your transparent Gamer HUD chat is live!
+```
+Twitch IRC WS  ─┐
+Kick Pusher WS ─┼─> HUD Engine (overlay.html) ──> OBS Browser Source
+YouTube API v3 ─┘
 ```
 
 ---
 
-## 🚀 Free 1-Click Hosting Options
+## System Architecture
 
-| Platform | Deployment Method | Notes |
-|---|---|---|
-| **⭐ GitHub Pages** | Push repository to GitHub → **Settings → Pages** → Enable branch `main` | Free HTTPS URL: `username.github.io/Chat-overlay/` |
-| **⚡ Netlify Drop** | Drag and drop project folder directly at **[netlify.com/drop](https://app.netlify.com/drop)** | Live in 20 seconds with instant SSL certificate |
-| **▲ Vercel** | Import GitHub repository into Vercel dashboard | Automatic edge deployments with global zero latency |
-| **🔥 Cloudflare Pages** | Connect GitHub repo to Cloudflare Pages | Unlimited bandwidth and worldwide CDN edge routing |
+```mermaid
+flowchart TD
+    subgraph ConfigDeck ["Command Deck (index.html)"]
+        A[Platform Config & Channel Setup] --> B[HUD Theme & Font Selection]
+        B --> C[Visual & Synthesizer Parameters]
+        C --> D[Live Test Dispatcher]
+        D --> E[OBS URL Generator]
+    end
+
+    subgraph OverlayRuntime ["HUD Runtime Engine (overlay.html)"]
+        F[Query Parameter Parser] --> G[Theme & Layout Bootstrap]
+        G --> H[Multi-Platform Ingestion]
+        H --> I[Twitch IRC WebSocket]
+        H --> J[Kick Pusher WebSocket]
+        H --> K[YouTube Data API v3]
+        I & J & K --> L[Emote Pipeline: Built-in + 7TV + BTTV + FFZ]
+        L --> M[Throttled Queue & DOM Dispatcher]
+        M --> N[Procedural FM Audio Synthesizer]
+    end
+
+    subgraph BroadcastTarget ["Compositor (OBS Studio / Streamlabs)"]
+        O[OBS Browser Source] --> P[Transparent Layer HUD]
+        P --> Q[Hardware-Accelerated Stream Output]
+    end
+
+    E --> F
+    N --> O
+```
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Streamer as Streamer (OBS / Browser)
+    participant Deck as Command Deck (index.html)
+    participant Overlay as Runtime HUD (overlay.html)
+    participant Platforms as Twitch / YouTube / Kick
+    participant Emotes as 7TV / BTTV / FFZ CDNs
+
+    Streamer->>Deck: Configure theme and parameters
+    Deck->>Overlay: postMessage({ kind: 'config_update' })
+    Overlay-->>Deck: Reactive DOM synchronization (zero reload)
+
+    Streamer->>Overlay: Load URL in OBS Browser Source
+    Overlay->>Platforms: Connect Twitch IRC + Kick Pusher + YouTube Polling
+    Overlay->>Emotes: Resolve global and channel emote sets
+    Platforms-->>Overlay: Message streams and event payloads
+    Overlay->>Overlay: Parse badges, format emotes, synthesize audio, render card
+```
 
 ---
 
-## 🎨 Custom CSS Recipes
+## Key Capabilities
 
-You can pass custom CSS via `?custom_css=` or in the Command Deck's Custom CSS playground:
+- **Zero Runtime Dependencies:** Built strictly with vanilla Web Standards (HTML5, CSS3, ES2022 JavaScript, Web Audio API, WebSockets). No Node.js runtime, npm packages, or build pipelines required.
+- **Simultaneous Multi-Platform Ingestion:** Connects concurrently to Twitch (Anonymous IRC WebSocket), YouTube Live (Data API v3 polling), and Kick (Pusher WebSocket) into a unified, synchronized HUD stream.
+- **Emote Engine & CDN Resolution:** 40+ built-in fallback emote mappings with verified 200 OK CDN endpoints plus asynchronous fetching for 7TV v3, BetterTTV, and FrankerFaceZ channel and global sets.
+- **BigEmote Auto-Scaling:** Messages consisting solely of 1 to 3 emotes automatically scale to 1.8x height.
+- **10 HUD Design Presets:** Built-in modular themes with custom clip paths, font pairings, and CSS variable styling.
+- **Hardware-Accelerated Compositing:** 60fps CSS transitions (Glitch, Slide, Pop, Fade, Float, Zoom) utilizing `transform` and `opacity` with layout containment and strict memory limits.
+- **Multi-Tier Event Alerts:** Visual formatting for Subscriptions, Resubs, Gift Subscriptions, Raids, Bits, YouTube Memberships, and color-tiered YouTube SuperChats.
+- **Procedural FM Audio Synthesizer:** 6 synthesized audio profiles generated in real time via the Web Audio API with automatic `AudioContext` state resumption in OBS Studio.
+- **Interactive Control Deck:** Full configuration GUI in `index.html` with real-time `postMessage` synchronization, stream test deck, and LocalStorage persistence.
 
-### Rainbow Animated Usernames:
+---
+
+## HUD Theme Matrix
+
+| Theme ID | Design Aesthetic | Primary Accent | Secondary Accent |
+|---|---|---|---|
+| `neon` | Cyberpunk / Neo-Tokyo with scanline contrast | `#00f0ff` | `#ff007f` |
+| `valorant` | Tactical Sci-Fi with 45-degree chamfers and killfeed styling | `#ff4655` | `#ece8e1` |
+| `stealth` | OLED Minimal monochrome (Shroud / Tarik style) | `#ffffff` | `#a1a1aa` |
+| `fire` | Magma / Apex Champion molten glow | `#ff3700` | `#ffaa00` |
+| `cyber` | Phosphor green terminal with dashed border styling | `#00ff66` | `#00f0ff` |
+| `synthwave` | Outrun 80s horizon gradient | `#f43f5e` | `#fbbf24` |
+| `glass` | Frosted glassmorphism with 24px backdrop blur | `#ffffff` | `#94a3b8` |
+| `rose` | Sakura soft aesthetic with rounded pill geometry | `#fb7185` | `#f43f5e` |
+| `ocean` | Arcane / Deep Abyssal rune blue gradient | `#0ea5e9` | `#14b8a6` |
+| `floating` | 0% background opacity with high-contrast text contour | `#ffffff` | `#00f0ff` |
+
+*Theme aliases (`cyberpunk`, `tactical`, `minimal`, `magma`, `matrix`, `sunset`, `frost`, `kawaii`, `hextech`, `pure`) are mapped automatically.*
+
+---
+
+## Configuration & URL Query Parameter Specification
+
+Parameters can be passed directly to `overlay.html` via URL query parameters or configured interactively using `index.html`.
+
+### Platform Connection Parameters
+
+| Parameter | Type | Default | Example | Description |
+|---|---|---|---|---|
+| `twitch` | `string` | `""` | `shroud` | Twitch channel username (anonymous IRC WebSocket). |
+| `yt_key` | `string` | `""` | `AIzaSy...` | Google Cloud API key with YouTube Data API v3 enabled. |
+| `yt_vid` | `string` | `""` | `dQw4w9WgXcQ` | Active YouTube live broadcast video ID. |
+| `kick` | `string` | `""` | `xqc` | Kick channel username. |
+| `kick_id` | `string` | `""` | `123456` | Direct numeric Kick chatroom ID. |
+| `avatar` | `string` | `""` | `https://...` | Custom streamer fallback avatar image URL. |
+
+### Visual & Layout Parameters
+
+| Parameter | Type | Default | Example | Description |
+|---|---|---|---|---|
+| `theme` | `string` | `neon` | `valorant` | Active HUD theme preset identifier. |
+| `font` | `string` | `""` | `chakra` | Typography override (`rajdhani`, `chakra`, `orbitron`, `space-mono`, `inter`, `press-start`). |
+| `opacity` | `number` | `90` | `0` | Card background opacity percentage (`0` = pure floating text, `100` = solid card). |
+| `stroke` | `0 \| 1` | `0` | `1` | Enables high-contrast black text outline for readability over bright video. |
+| `anim` | `string` | `glitch` | `slide` | Entrance animation (`glitch`, `slide`, `pop`, `fade`, `float`, `zoom`). |
+| `pos` | `string` | `right` | `left` | Screen dock anchor (`right`, `left`, `top-right`, `top-left`). |
+| `dir` | `up \| down` | `up` | `down` | Message flow order (`up` = bottom-up stack, `down` = top-down list). |
+| `size` | `number` | `14` | `16` | Base font size in pixels. |
+| `emote_size` | `number` | `26` | `32` | Standard emote render height in pixels. |
+| `dur` | `number` | `25` | `0` | Message lifetime in seconds before dismissal (`0` = permanent log). |
+| `max` | `number` | `20` | `15` | Maximum concurrent messages retained in the DOM. |
+| `avatars` | `0 \| 1` | `1` | `0` | Toggle profile avatar visibility. |
+| `badges` | `0 \| 1` | `1` | `0` | Toggle moderator, subscriber, and VIP badge icons. |
+| `time` | `0 \| 1` | `0` | `1` | Toggle `[HH:MM]` timestamps on messages. |
+| `status` | `0 \| 1` | `0` | `1` | Toggle connection status indicator in top corner. |
+
+### Audio & Moderation Parameters
+
+| Parameter | Type | Default | Example | Description |
+|---|---|---|---|---|
+| `sound` | `0 \| 1` | `1` | `0` | Enable procedural sound synthesis on incoming messages and events. |
+| `sound_profile` | `string` | `cyber` | `ping` | FM synthesis profile (`cyber`, `coin`, `chime`, `ping`, `pop`, `mute`). |
+| `volume` | `number` | `0.45` | `0.7` | Master synthesizer volume (`0.0` to `1.0`). |
+| `highlight` | `string` | `""` | `myhandle` | Username target for golden illuminated mention borders. |
+| `filter` | `string` | `""` | `word1,word2` | Comma-separated list of terms to suppress from the feed. |
+| `accent` | `hex` | `""` | `00f0ff` | Custom primary accent color (hex without `#`). |
+| `accent2` | `hex` | `""` | `ff007f` | Custom secondary accent color (hex without `#`). |
+| `demo` | `0 \| 1` | `0` | `1` | Runs simulated chat messages and events for staging. |
+
+---
+
+## OBS Studio / Streamlabs Integration
+
+```
+1. Open index.html in a web browser and configure your platforms and visual settings.
+2. Select an OBS resolution preset:
+   - Sidebar:    420 x 850
+   - Bottom Bar: 850 x 250
+   - Compact:    320 x 500
+   - Fullscreen: 1920 x 1080
+3. Copy the generated URL from Card [07].
+4. In OBS Studio: Sources Panel -> Add (+) -> Browser.
+5. Set Name: "Stream Chat Overlay".
+6. Paste the URL into the "URL" field.
+7. Set Width and Height to match the chosen resolution preset.
+8. Uncheck "Shutdown source when not visible" (maintains active WebSockets across scene transitions).
+9. Check "Control audio via OBS" if you wish to route synthesized alert audio into OBS audio tracks.
+10. Click OK.
+```
+
+---
+
+## Deployment Targets
+
+Because the codebase consists solely of static assets, it can be hosted on any static web server or CDN:
+
+- **GitHub Pages:** Repository Settings -> Pages -> Source: Deploy from branch `main` / `root`.
+- **Cloudflare Pages:** Connect Git repository -> Framework preset: None -> Build output directory: `/`.
+- **Vercel / Netlify:** Import repository directly with zero build configuration.
+- **Local File / Offline:** Open `index.html` or point OBS Browser Source directly to `file:///path/to/overlay.html`.
+
+---
+
+## Custom CSS Extension API
+
+You can inject stylesheet overrides using the `?custom_css=` query parameter (URL encoded) or within the Custom CSS playground in `index.html`.
+
+### Monospace Code Block Style
+
+```css
+.msg {
+  font-family: 'Space Mono', monospace !important;
+  letter-spacing: -0.02em;
+}
+```
+
+### High-Intensity Custom Border Glow
+
+```css
+.msg {
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.4) !important;
+}
+```
+
+### Gradient Text Username
+
 ```css
 .username {
-  background: linear-gradient(90deg, #ff007f, #00f0ff, #fcee0a);
+  background: linear-gradient(135deg, #00f0ff, #ff007f);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 ```
 
-### Neon Cyber Glow:
-```css
-.msg {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.5) !important;
-}
-```
-
-### Rounded Floating Pill Style:
-```css
-.msg {
-  border-radius: 20px !important;
-  clip-path: none !important;
-}
-```
-
 ---
 
-## 📄 License
+## License
 
-MIT License © GamingOP69. Feel free to use, customize, and stream with this overlay!
+MIT License. Open-source and free for all streamers and developers.

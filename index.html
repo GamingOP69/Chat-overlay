@@ -69,10 +69,8 @@ body {
 }
 .scan-line {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
-  animation: scanMove 10s linear infinite;
+  background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
 }
-@keyframes scanMove { from { background-position: 0 0; } to { background-position: 0 120px; } }
 
 /* ═══════════════════════════════════════════════════════════
    03. RESPONSIVE TWO-COLUMN LAYOUT
@@ -1514,14 +1512,16 @@ function sendTest(type) {
   } else if (type === 'kick') {
     target.postMessage({ kind: 'chat', secret: securitySecret, user: rName, color: '#53b94f', platform: 'kick', text: 'Kick chat connected! catJAM W stream!', badges: ['subscriber'] }, '*');
   } else if (type === 'burst') {
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
       setTimeout(() => {
         const u = fakeNames[Math.floor(Math.random() * fakeNames.length)];
         const c = fakeColors[Math.floor(Math.random() * fakeColors.length)];
         const m = testMsgs[Math.floor(Math.random() * testMsgs.length)];
         target.postMessage({ kind: 'chat', secret: securitySecret, user: u, color: c, platform: 'twitch', text: m }, '*');
-      }, i * 150);
+      }, i * 350);
     }
+  } else if (type === 'clear') {
+    target.postMessage({ kind: 'clear', secret: securitySecret }, '*');
   }
 }
 

@@ -1,76 +1,26 @@
-# StreamChat Overlay — Architecture & Workflow
-
-```mermaid
 flowchart TD
-  subgraph Config ["Command Deck UI (index.html)"]
-    A[Configure Platform Usernames & IDs] --> B[Pick from 10 Pro Gamer HUD Themes]
-    B --> C[Customize Typography, Opacity, Stroke & FM Audio Profiles]
-    C --> D[Test Live with Interactive Stream Test Deck & Soundboard]
-    D --> E[Select OBS Resolution Preset & Copy Secure URL]
-  end
+    subgraph ConfigDeck ["Command Deck (index.html)"]
+        A[Platform Config & Channel Setup] --> B[HUD Theme & Font Selection]
+        B --> C[Visual & Synthesizer Parameters]
+        C --> D[Live Test Dispatcher]
+        D --> E[OBS URL Generator]
+    end
 
-  subgraph Engine ["Runtime HUD Engine (overlay.html)"]
-    F[Read URL Search Parameters] --> G[Initialize 10 HUD Themes & Custom CSS]
-    G --> H[Connect Multi-Platform WebSockets / REST API]
-    H --> I[60+ Emote Dictionary + 7TV / BTTV / FFZ Live Engine]
-    I --> J[BigEmote Scaler & Word Censorship Filter]
-    J --> K[Hardware-Accelerated 60fps Animations & Queue]
-    K --> L[Multi-Tier Event Alerts & Procedural FM Synthesizer]
-  end
+    subgraph OverlayRuntime ["HUD Runtime Engine (overlay.html)"]
+        F[Query Parameter Parser] --> G[Theme & Layout Bootstrap]
+        G --> H[Multi-Platform Ingestion]
+        H --> I[Twitch IRC WebSocket]
+        H --> J[Kick Pusher WebSocket]
+        H --> K[YouTube Data API v3]
+        I & J & K --> L[Emote Pipeline: Built-in + 7TV + BTTV + FFZ]
+        L --> M[Throttled Queue & DOM Dispatcher]
+        M --> N[Procedural FM Audio Synthesizer]
+    end
 
-  subgraph Stream ["OBS Studio / Streamlabs"]
-    M[Add Browser Source with URL] --> N[Overlay Appears with Transparent Background]
-    N --> O[Crisp High-Contrast HUD Floating Live on Stream]
-  end
+    subgraph BroadcastTarget ["Compositor (OBS Studio / Streamlabs)"]
+        O[OBS Browser Source] --> P[Transparent Layer HUD]
+        P --> Q[Hardware-Accelerated Stream Output]
+    end
 
-  E --> F
-  L --> M
-```
-
-```mermaid
-sequenceDiagram
-  autonumber
-  participant Streamer as Streamer (Browser / OBS)
-  participant Deck as Command Deck (index.html)
-  participant Overlay as Overlay HUD (overlay.html)
-  participant Platforms as Twitch / YouTube / Kick APIs
-  participant EmoteAPIs as 7TV / BTTV / FFZ CDNs
-
-  Streamer->>Deck: Select Theme & Parameters
-  Deck->>Overlay: postMessage({ kind: 'config_update' })
-  Overlay-->>Deck: Reactive Live Preview Updated (Zero Lag)
-  
-  Streamer->>Deck: Click '💬 Chat' or '🎁 Gift' in Test Deck
-  Deck->>Overlay: postMessage({ kind: 'chat' / 'event' })
-  Overlay->>Overlay: Play Procedural FM Synth Tone & Animate Card
-
-  Streamer->>Overlay: Launches Browser Source in OBS Studio
-  Overlay->>Platforms: Connect Twitch (IRC) + YouTube (API) + Kick (Pusher)
-  Overlay->>EmoteAPIs: Fetch 7TV, BTTV, FFZ Channel & Global Emotes
-  Platforms-->>Overlay: Incoming Chat Messages & Hype Events
-  Overlay->>Overlay: Parse Badges, Emotes, BigEmotes & Render 60fps HUD
-```
-
----
-
-## ⚡ URL Parameters Quick Sheet
-
-```text
-# Pro Gamer Cyberpunk (Twitch + Kick Dual Stream)
-overlay.html?twitch=tarik&kick=xqc&theme=neon&anim=glitch&sound_profile=cyber
-
-# Tactical Valorant Style (with high-contrast black outline)
-overlay.html?twitch=shroud&theme=valorant&anim=slide&stroke=1&sound_profile=ping
-
-# OLED Stealth Minimal (0% transparent floating text)
-overlay.html?twitch=tarik&theme=stealth&opacity=0&stroke=1&font=inter
-
-# Magma Apex Champion Style
-overlay.html?kick=trainwreck&theme=fire&anim=pop&sound_profile=coin
-
-# YouTube Live with SuperChat Alerts
-overlay.html?yt_key=AIzaSy...&yt_vid=dQw4w9WgXcQ&theme=glass&font=chakra
-
-# Offline Simulation / Demo Mode
-overlay.html?demo=1&theme=synthwave&anim=glitch&sound_profile=cyber&status=1
-```
+    E --> F
+    N --> O

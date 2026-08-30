@@ -101,7 +101,7 @@
     --username-font: 'Rajdhani', sans-serif;
   }
   body.theme-fire .msg, body.theme-magma .msg {
-    animation: fireEmber 3.5s infinite alternate ease-in-out;
+    animation: fireEmber 3.5s ease-in-out 3 forwards;
   }
   @keyframes fireEmber {
     0%   { border-left-color: #ff3700; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 20px rgba(255,55,0,0.25); }
@@ -223,13 +223,11 @@
     max-height: calc(100vh - 32px);
     display: flex;
     flex-direction: column-reverse; /* Default: Bottom-Up */
-    gap: 8px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    gap: 6px;
+    overflow: hidden;
     pointer-events: auto;
-    scrollbar-width: none;
+    contain: layout style;
   }
-  #chat-wrap::-webkit-scrollbar { display: none; }
 
   /* Dock Positioning */
   body.pos-left #chat-wrap { right: auto; left: 16px; }
@@ -237,31 +235,6 @@
   body.pos-top-right #chat-wrap { right: 16px; bottom: auto; top: 16px; flex-direction: column; }
   body.dir-down #chat-wrap { flex-direction: column; }
 
-  /* Scrollback Pause Notice */
-  #scroll-notice {
-    position: fixed;
-    bottom: 12px;
-    right: 16px;
-    z-index: 100;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    background: var(--accent);
-    color: #000;
-    font-family: var(--font-family);
-    font-weight: 700;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    clip-path: var(--card-clip);
-    border-radius: var(--border-radius, 4px);
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.6), 0 0 16px var(--glow);
-    animation: pulseNotice 1.5s infinite;
-  }
-  body.pos-left #scroll-notice { right: auto; left: 16px; }
-  @keyframes pulseNotice { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
   /* ═══════════════════════════════════════════════════════════
      04. HUD MESSAGE CARD DESIGN & SHIMMER
@@ -496,7 +469,7 @@
     background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(0,0,0,0.65)), var(--msg-bg);
     border-color: rgba(255,255,255,0.25);
     border-left-width: 4px;
-    animation: eventBannerIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both, eventPulseBorder 2.5s 0.4s infinite ease-in-out !important;
+    animation: eventBannerIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both, eventPulseBorder 2.5s 0.4s 4 ease-in-out !important;
   }
   @keyframes eventBannerIn {
     0%   { transform: translateY(-16px) scale3d(0.95, 0.95, 1); opacity: 0; }
@@ -671,7 +644,6 @@
 
 <div id="status"><div class="dot" id="dot"></div><span id="status-text">Connecting…</span></div>
 <div id="chat-wrap"></div>
-<div id="scroll-notice" onclick="resumeScroll()">↓ New Messages</div>
 <div id="guide" style="display:none">
   <h2>⚡ StreamChat Overlay</h2>
   <p>Open <code>index.html</code> to configure your HUD</p>
@@ -815,7 +787,6 @@ const dot = document.getElementById('dot');
 const stEl = document.getElementById('status-text');
 const guide = document.getElementById('guide');
 const statusEl = document.getElementById('status');
-const scrollNotice = document.getElementById('scroll-notice');
 
 if (currentShowStatus) statusEl.classList.add('visible');
 
@@ -1291,42 +1262,9 @@ function refreshStatus() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   16. SCROLLBACK BUFFER & SMOOTH QUEUE ENGINE
+   16. QUEUE ENGINE
 ═══════════════════════════════════════════════════════════ */
-let isScrolledUp = false;
-let missedMessages = 0;
 
-wrap.addEventListener('scroll', () => {
-  const isDown = currentChatDir === 'down';
-  let atBottom = false;
-
-  if (isDown) {
-    atBottom = wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight < 40;
-  } else {
-    atBottom = Math.abs(wrap.scrollTop) < 40;
-  }
-
-  if (!atBottom) {
-    if (!isScrolledUp) isScrolledUp = true;
-  } else {
-    isScrolledUp = false;
-    missedMessages = 0;
-    scrollNotice.style.display = 'none';
-  }
-});
-
-function resumeScroll() {
-  if (currentChatDir === 'down') {
-    wrap.scrollTop = wrap.scrollHeight;
-  } else {
-    wrap.scrollTop = 0;
-  }
-  isScrolledUp = false;
-  missedMessages = 0;
-  scrollNotice.style.display = 'none';
-}
-
-const MESSAGE_BATCH_SIZE = 1;
 const MESSAGE_QUEUE_LIMIT = 30;
 const messageQueue = [];
 let flushScheduled = false;
@@ -1346,12 +1284,6 @@ function enqueueMessage(message) {
     messageQueue.shift();
   }
   messageQueue.push(message);
-
-  if (isScrolledUp) {
-    missedMessages++;
-    scrollNotice.textContent = `↓ ${missedMessages} New Message${missedMessages > 1 ? 's' : ''}`;
-    scrollNotice.style.display = 'flex';
-  }
 
   if (!flushScheduled) {
     flushScheduled = true;
