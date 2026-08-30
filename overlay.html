@@ -1265,12 +1265,12 @@ function refreshStatus() {
    16. QUEUE ENGINE
 ═══════════════════════════════════════════════════════════ */
 
-const MESSAGE_QUEUE_LIMIT = 30;
+const MESSAGE_QUEUE_LIMIT = 60;
 const messageQueue = [];
 let flushScheduled = false;
 let messageCount = 0;
 let lastFlushTime = 0;
-const FLUSH_INTERVAL = 50; // ms between batches
+const FLUSH_INTERVAL = 40; // ms between batches
 
 function enqueueMessage(message) {
   if (WORD_FILTER.length > 0 && message.text) {
@@ -1279,7 +1279,7 @@ function enqueueMessage(message) {
     if (hasBanned) return;
   }
 
-  // Drop oldest queued (not yet rendered) message if queue is full
+  // Drop oldest queued message if queue is full
   if (messageQueue.length >= MESSAGE_QUEUE_LIMIT) {
     messageQueue.shift();
   }
@@ -1293,22 +1293,27 @@ function enqueueMessage(message) {
 
 function flushMessages() {
   flushScheduled = false;
-  const msg = messageQueue.shift();
-  if (!msg) return;
+  const batchSize = Math.min(messageQueue.length, 4);
+  if (batchSize === 0) return;
 
   const isDown = currentChatDir === 'down';
-  try {
-    const card = renderMessage(msg);
-    if (isDown) {
-      wrap.appendChild(card);
-    } else {
-      wrap.insertBefore(card, wrap.firstChild);
+
+  for (let i = 0; i < batchSize; i++) {
+    const msg = messageQueue.shift();
+    if (!msg) break;
+    try {
+      const card = renderMessage(msg);
+      if (isDown) {
+        wrap.appendChild(card);
+      } else {
+        wrap.insertBefore(card, wrap.firstChild);
+      }
+    } catch (e) {
+      console.warn('[Overlay] renderMessage error:', e);
     }
-  } catch (e) {
-    console.warn('[Overlay] renderMessage error:', e);
   }
 
-  // Prune: immediately remove oldest DOM cards beyond limit (no animation, instant)
+  // Prune oldest DOM cards beyond limit
   while (wrap.children.length > currentMaxMsg) {
     const victim = isDown ? wrap.firstChild : wrap.lastChild;
     if (victim) victim.remove();
@@ -1511,7 +1516,8 @@ function parseIrcTags(rawTags) {
 
 function handleTwitchMessage(line, ws) {
   if (line.startsWith('PING')) {
-    ws.send('PONG :tmi.twitch.tv\r\n');
+    const payload = line.slice(5).trim() || ':tmi.twitch.tv';
+    try { ws.send(`PONG ${payload}\r\n`); } catch {}
     return;
   }
 
@@ -1520,9 +1526,11 @@ function handleTwitchMessage(line, ws) {
 
   if (line.startsWith('@')) {
     const splitIndex = line.indexOf(' ');
-    const rawTags = line.slice(1, splitIndex);
-    rest = line.slice(splitIndex + 1);
-    tags = parseIrcTags(rawTags);
+    if (splitIndex !== -1) {
+      const rawTags = line.slice(1, splitIndex);
+      rest = line.slice(splitIndex + 1);
+      tags = parseIrcTags(rawTags);
+    }
   }
 
   if (rest.includes('PRIVMSG')) {
@@ -1562,6 +1570,7 @@ function handleTwitchMessage(line, ws) {
     }
 
     enqueueMessage({ user, color: tags.color || null, text: message, badges, emotes, isAction, platform: 'twitch' });
+    return;
   }
 
   if (rest.includes('USERNOTICE')) {
@@ -1612,9 +1621,13 @@ function scheduleReconnect(source, callback) {
   reconnectTimers[source] = setTimeout(callback, delay);
 }
 
-function connectTwitch(channel) {
+function connectTwitch(rawChannel) {
+  const channel = (rawChannel || '').toLowerCase().replace(/^#/, '').trim();
+  if (!channel) return;
+
   setSourceState('twitch', 'Twitch', `joining #${channel}…`, false);
   const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+  let pingInterval = null;
 
   let connectionTimeout = setTimeout(() => {
     setSourceState('twitch', 'Twitch', 'timeout — retrying…', false);
@@ -1623,26 +1636,42 @@ function connectTwitch(channel) {
 
   ws.onopen = () => {
     clearTimeout(connectionTimeout);
-    ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands\r\n');
-    ws.send(`PASS SCHMOOPIIE\r\nNICK justinfan${Math.floor(Math.random() * 99999)}\r\n`);
+    const nick = 'justinfan' + Math.floor(10000 + Math.random() * 90000);
+    ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership\r\n');
+    ws.send('PASS SCHMOOPIIE\r\n');
+    ws.send(`NICK ${nick}\r\n`);
     ws.send(`JOIN #${channel}\r\n`);
     retryDelays.twitch = 1000;
     setSourceState('twitch', 'Twitch', `#${channel}`, true);
     guide.style.display = 'none';
+
+    // Keepalive ping every 45s
+    pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        try { ws.send('PING :tmi.twitch.tv\r\n'); } catch {}
+      }
+    }, 45000);
   };
 
   ws.onmessage = ({ data }) => {
-    data.split('\r\n').forEach((line) => {
-      if (line) handleTwitchMessage(line, ws);
-    });
+    if (typeof data !== 'string') return;
+    const lines = data.split(/\r?\n/);
+    for (const line of lines) {
+      if (line.trim()) handleTwitchMessage(line.trim(), ws);
+    }
   };
 
-  ws.onerror = () => {
+  ws.onerror = (err) => {
     clearTimeout(connectionTimeout);
+    if (pingInterval) clearInterval(pingInterval);
+    console.warn('[Twitch IRC] Error:', err);
     setSourceState('twitch', 'Twitch', 'connection error', false);
   };
-  ws.onclose = () => {
+
+  ws.onclose = (ev) => {
     clearTimeout(connectionTimeout);
+    if (pingInterval) clearInterval(pingInterval);
+    console.warn('[Twitch IRC] Closed (code ' + ev.code + ') — reconnecting...');
     setSourceState('twitch', 'Twitch', 'reconnecting…', false);
     scheduleReconnect('twitch', () => connectTwitch(channel));
   };

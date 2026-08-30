@@ -587,6 +587,56 @@ input[type=range]::-webkit-slider-thumb {
 .host-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
 .host-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
 
+/* OBS & Streamlabs Guide Enhancements */
+.guide-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.guide-tab {
+  padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border);
+  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
+  color: var(--muted); cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+}
+.guide-tab:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+.guide-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(0, 240, 255, 0.08); }
+
+.obs-table-wrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--border); background: var(--surface2); }
+.obs-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.obs-table th {
+  background: var(--surface3); padding: 8px 12px; text-align: left;
+  font-family: 'Space Mono', monospace; font-size: 9.5px; color: var(--accent);
+  letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border);
+}
+.obs-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle; }
+.obs-table tr:last-child td { border-bottom: none; }
+
+.tag-req { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 6px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 2px; text-transform: uppercase; }
+.tag-ok { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 6px; background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 2px; text-transform: uppercase; }
+.tag-warn { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; padding: 2px 6px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 2px; text-transform: uppercase; }
+
+.obs-mockup {
+  background: #0d121d; border: 1px solid #1f2a3d; border-radius: 4px;
+  padding: 14px 16px; margin: 14px 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px; color: #d1d5db;
+}
+.obs-mockup-title {
+  font-weight: 600; font-size: 12.5px; color: #f3f4f6; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid #1f2a3d; display: flex; justify-content: space-between; align-items: center;
+}
+.obs-mockup-row { display: flex; align-items: center; margin-bottom: 8px; gap: 12px; }
+.obs-mockup-label { width: 150px; flex-shrink: 0; color: #9ca3af; font-size: 11.5px; }
+.obs-mockup-val {
+  flex: 1; background: #060911; border: 1px solid #1f2a3d; padding: 5px 10px;
+  border-radius: 3px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.obs-mockup-check { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: #e5e7eb; font-size: 11.5px; }
+.obs-mockup-check input[type="checkbox"] { accent-color: var(--accent); }
+
+.obs-note-box {
+  background: rgba(0, 240, 255, 0.04); border-left: 3px solid var(--accent);
+  padding: 10px 14px; font-size: 12px; line-height: 1.5; color: var(--text-dim); margin-top: 12px;
+}
+.obs-note-box strong { color: var(--text); }
+
 /* ═══════════════════════════════════════════════════════════
    14. TOAST NOTIFICATION & PRESETS
 ═══════════════════════════════════════════════════════════ */
@@ -1042,10 +1092,10 @@ input[type=range]::-webkit-slider-thumb {
 
       <div class="preset-row">
         <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--muted);text-transform:uppercase;font-weight:700;">Presets:</span>
-        <div class="preset-chip" onclick="copyPreset(420,850)">📐 Sidebar 420×850</div>
-        <div class="preset-chip" onclick="copyPreset(850,250)">📐 Bottom Bar 850×250</div>
-        <div class="preset-chip" onclick="copyPreset(320,500)">📐 Compact 320×500</div>
-        <div class="preset-chip" onclick="copyPreset(1920,1080)">📐 Full 1920×1080</div>
+        <div class="preset-chip" onclick="copyPreset(420,850)">Sidebar 420×850</div>
+        <div class="preset-chip" onclick="copyPreset(850,250)">Bottom Bar 850×250</div>
+        <div class="preset-chip" onclick="copyPreset(320,500)">Compact 320×500</div>
+        <div class="preset-chip" onclick="copyPreset(1920,1080)">Full 1920×1080</div>
       </div>
 
       <div class="terminal-box">
@@ -1055,23 +1105,187 @@ input[type=range]::-webkit-slider-thumb {
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="copyUrl()">📋 Copy Overlay URL</button>
-        <button class="btn btn-secondary" onclick="openOverlay()">🚀 Open Overlay</button>
-        <button class="btn btn-ghost" onclick="openDemo()">🎭 Demo Window</button>
+        <button class="btn btn-primary" onclick="copyUrl()">Copy Overlay URL</button>
+        <button class="btn btn-secondary" onclick="openOverlay()">Open Overlay</button>
+        <button class="btn btn-ghost" onclick="openDemo()">Demo Window</button>
       </div>
     </div>
 
-    <!-- [08] OBS SETUP GUIDE -->
+    <!-- [08] OBS & STREAMLABS SETUP GUIDE -->
     <div class="card" id="sec-obs">
       <div class="card-header">
-        <div class="card-title"><span class="card-step">[08]</span> OBS Studio &amp; Streamlabs Setup</div>
+        <div class="card-title"><span class="card-step">[08]</span> OBS Studio &amp; Streamlabs Integration Guide</div>
       </div>
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><div class="step-text">Host your files (GitHub Pages / Netlify) and click <strong>Copy Overlay URL</strong> above.</div></div>
-        <div class="step"><div class="step-num">2</div><div class="step-text">In OBS Studio: <strong>Sources → + → Browser</strong>. Name it <code>Stream Chat HUD</code>.</div></div>
-        <div class="step"><div class="step-num">3</div><div class="step-text">Paste your <strong>Overlay URL</strong> into the URL field.</div></div>
-        <div class="step"><div class="step-num">4</div><div class="step-text">Set Width: <strong>420</strong>, Height: <strong>850</strong> (or your chosen preset resolution).</div></div>
-        <div class="step"><div class="step-num">5</div><div class="step-text">Uncheck <strong>"Shutdown source when not visible"</strong> so chat stays connected during scene switches.</div></div>
+
+      <!-- Platform Tabs -->
+      <div class="guide-tabs">
+        <button class="guide-tab active" id="tab-btn-obs" onclick="switchGuideTab('obs')">OBS Studio</button>
+        <button class="guide-tab" id="tab-btn-slobs" onclick="switchGuideTab('slobs')">Streamlabs Desktop</button>
+        <button class="guide-tab" id="tab-btn-prism" onclick="switchGuideTab('prism')">Prism Live / vMix</button>
+      </div>
+
+      <!-- OBS Studio Guide Panel -->
+      <div class="guide-panel" id="tab-panel-obs">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              Under the <strong>Sources</strong> dock in OBS Studio, click the <strong>+ (Add)</strong> button and select <strong>Browser</strong>.
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              Select <strong>Create new</strong>, name the source <code>Stream Chat HUD</code>, ensure <strong>Make source visible</strong> is checked, and click <strong>OK</strong>.
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              In the Browser Source Properties dialog, configure the fields according to the specification table below.
+            </div>
+          </div>
+        </div>
+
+        <!-- OBS Properties Reference Table -->
+        <div class="obs-table-wrap">
+          <table class="obs-table">
+            <thead>
+              <tr>
+                <th>OBS Property Field</th>
+                <th>Recommended Value</th>
+                <th>Status</th>
+                <th>Technical Requirement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>URL</strong></td>
+                <td><code>Generated Overlay URL</code></td>
+                <td><span class="tag-req">Required</span></td>
+                <td>Paste your copied URL from Card [07].</td>
+              </tr>
+              <tr>
+                <td><strong>Width &amp; Height</strong></td>
+                <td><code>420 × 850</code> (Sidebar)</td>
+                <td><span class="tag-req">Required</span></td>
+                <td>Matches your chosen preset resolution.</td>
+              </tr>
+              <tr>
+                <td><strong>Control audio via OBS</strong></td>
+                <td><code>Checked</code> (or Unchecked)</td>
+                <td><span class="tag-ok">Optional</span></td>
+                <td>Enables routing synthesized audio alerts into the OBS Audio Mixer.</td>
+              </tr>
+              <tr>
+                <td><strong>Use custom frame rate</strong></td>
+                <td><code>60 FPS</code></td>
+                <td><span class="tag-ok">Optional</span></td>
+                <td>Ensures hardware-accelerated 60fps animations.</td>
+              </tr>
+              <tr>
+                <td><strong>Custom CSS</strong></td>
+                <td><code>Keep Default</code></td>
+                <td><span class="tag-ok">Default</span></td>
+                <td>Default transparent body background.</td>
+              </tr>
+              <tr>
+                <td><strong>Shutdown source when not visible</strong></td>
+                <td><strong>UNCHECKED</strong></td>
+                <td><span class="tag-warn">CRITICAL</span></td>
+                <td>Must remain unchecked to keep WebSocket connections alive across scenes.</td>
+              </tr>
+              <tr>
+                <td><strong>Refresh browser when scene becomes active</strong></td>
+                <td><strong>UNCHECKED</strong></td>
+                <td><span class="tag-warn">CRITICAL</span></td>
+                <td>Must remain unchecked to prevent resetting chat history on scene transitions.</td>
+              </tr>
+              <tr>
+                <td><strong>Page permissions</strong></td>
+                <td><code>Read access to OBS status</code></td>
+                <td><span class="tag-ok">Default</span></td>
+                <td>Allows standard browser runtime environment.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Visual OBS Properties Mockup Box -->
+        <div class="obs-mockup">
+          <div class="obs-mockup-title">
+            <span>Properties for 'Stream Chat HUD' — OBS Studio</span>
+            <span style="font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;">BROWSER SOURCE</span>
+          </div>
+          <div class="obs-mockup-row">
+            <span class="obs-mockup-label">URL</span>
+            <span class="obs-mockup-val" id="mockup-url">https://.../overlay.html?twitch=...</span>
+          </div>
+          <div class="obs-mockup-row">
+            <span class="obs-mockup-label">Width</span>
+            <span class="obs-mockup-val" style="max-width:120px;">420</span>
+            <span class="obs-mockup-label" style="width:60px;text-align:right;">Height</span>
+            <span class="obs-mockup-val" style="max-width:120px;">850</span>
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1f2a3d;">
+            <div class="obs-mockup-check">
+              <input type="checkbox" checked disabled>
+              <span>Control audio via OBS (exposes sound effects to OBS audio mixer)</span>
+            </div>
+            <div class="obs-mockup-check">
+              <input type="checkbox" disabled>
+              <span style="color:#ef4444;font-weight:600;">[UNCHECKED] Shutdown source when not visible</span>
+            </div>
+            <div class="obs-mockup-check">
+              <input type="checkbox" disabled>
+              <span style="color:#ef4444;font-weight:600;">[UNCHECKED] Refresh browser when scene becomes active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="obs-note-box">
+          <strong>Pro Streamer Tip:</strong> To crop transparent edges or reposition without resizing text, hold the <code>Alt</code> key while dragging the red bounding box handles on the OBS canvas.
+        </div>
+      </div>
+
+      <!-- Streamlabs Desktop Guide Panel -->
+      <div class="guide-panel" id="tab-panel-slobs" style="display:none;">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">In Streamlabs Desktop: Navigate to the <strong>Sources</strong> panel, click <strong>+</strong> and select <strong>Browser Source</strong>.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Name the source <code>Stream Chat HUD</code> and click <strong>Add Source</strong>.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Paste your copied <strong>Overlay URL</strong> into the URL field and set Width to <strong>420</strong> and Height to <strong>850</strong>.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text">Leave <strong>"Shutdown source when not visible"</strong> UNCHECKED and click <strong>Done</strong>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prism Live / Other Guide Panel -->
+      <div class="guide-panel" id="tab-panel-prism" style="display:none;">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">In PRISM Live Studio, vMix, or Lightstream: Add a <strong>Web / Browser / HTML Source</strong>.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Paste your <strong>Overlay URL</strong> and set resolution to <strong>420 × 850</strong> (Sidebar) or <strong>850 × 250</strong> (Bottom).</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Ensure background transparency is enabled (HTML background is transparent by default).</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1083,20 +1297,20 @@ input[type=range]::-webkit-slider-thumb {
       <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">All platforms below are 100% free and provide permanent SSL URLs for OBS Studio.</p>
       <div class="host-grid">
         <div class="host-card">
-          <div class="host-name" style="color:#38bdf8;">⭐ GitHub Pages</div>
-          <div class="host-desc">Push repo → Settings → Pages. Free HTTPS at <code>username.github.io/Chat-overlay/</code></div>
+          <div class="host-name" style="color:#38bdf8;">GitHub Pages</div>
+          <div class="host-desc">Push repository -> Settings -> Pages -> Deploy from branch main. Free HTTPS URL.</div>
         </div>
         <div class="host-card">
-          <div class="host-name" style="color:#22c55e;">⚡ Netlify Drop</div>
-          <div class="host-desc">Drag &amp; drop project folder at <strong>netlify.com/drop</strong>. Live in 20 seconds.</div>
+          <div class="host-name" style="color:#22c55e;">Netlify Drop</div>
+          <div class="host-desc">Drag and drop the project folder directly at <strong>netlify.com/drop</strong>. Live in 20 seconds.</div>
         </div>
         <div class="host-card">
-          <div class="host-name" style="color:#fcee0a;">▲ Vercel</div>
-          <div class="host-desc">Connect GitHub repo. Auto-deploys on every git push with ultra-fast CDN edge.</div>
+          <div class="host-name" style="color:#fcee0a;">Vercel</div>
+          <div class="host-desc">Connect GitHub repository for automatic zero-configuration edge deployment.</div>
         </div>
         <div class="host-card">
-          <div class="host-name" style="color:#ff9900;">🔥 Cloudflare</div>
-          <div class="host-desc">Connect GitHub to Cloudflare Pages. Unlimited bandwidth and global edge speed.</div>
+          <div class="host-name" style="color:#ff9900;">Cloudflare Pages</div>
+          <div class="host-desc">Connect GitHub repo for unlimited bandwidth with global CDN edge routing.</div>
         </div>
       </div>
     </div>
@@ -1376,9 +1590,24 @@ function buildUrl() {
   const base = getOverlayBaseUrl();
   const p = gatherParams();
   const urlEl = document.getElementById('url-out');
+  const mockupEl = document.getElementById('mockup-url');
   const fullUrl = base + '?' + p.toString();
-  urlEl.textContent = fullUrl;
-  urlEl.setAttribute('title', fullUrl);
+  if (urlEl) {
+    urlEl.textContent = fullUrl;
+    urlEl.setAttribute('title', fullUrl);
+  }
+  if (mockupEl) {
+    mockupEl.textContent = fullUrl;
+  }
+}
+
+function switchGuideTab(tabName) {
+  document.querySelectorAll('.guide-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.guide-panel').forEach(p => p.style.display = 'none');
+  const targetBtn = document.getElementById(`tab-btn-${tabName}`);
+  const targetPanel = document.getElementById(`tab-panel-${tabName}`);
+  if (targetBtn) targetBtn.classList.add('active');
+  if (targetPanel) targetPanel.style.display = 'block';
 }
 
 function refreshPreview() {
@@ -1419,8 +1648,8 @@ function copyUrl() {
   if (!url) return;
   const tag = document.getElementById('copy-tag');
   const doSuccess = () => {
-    tag.textContent = '✓ COPIED';
-    showToast('✅ Overlay URL Copied!', 'success');
+    tag.textContent = 'COPIED';
+    showToast('Overlay URL copied to clipboard', 'success');
     setTimeout(() => tag.textContent = 'COPY URL', 2000);
   };
   if (navigator.clipboard?.writeText) {
@@ -1432,7 +1661,7 @@ function copyUrl() {
 
 function copyPreset(w, h) {
   copyUrl();
-  showToast(`✅ Copied! Set OBS Browser Source to ${w}×${h}px`, 'success');
+  showToast(`Copied! Set OBS Browser Source to ${w}×${h}px`, 'success');
 }
 
 function fallbackCopy(text, onSuccess) {
@@ -1442,7 +1671,7 @@ function fallbackCopy(text, onSuccess) {
   document.body.appendChild(ta);
   ta.select();
   try { document.execCommand('copy'); onSuccess?.(); }
-  catch { showToast('❌ Please copy manually'); }
+  catch { showToast('Please copy URL manually'); }
   finally { document.body.removeChild(ta); }
 }
 
