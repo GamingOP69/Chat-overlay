@@ -651,14 +651,19 @@
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   10. PARAMETERS & INITIALIZATION
-═══════════════════════════════════════════════════════════ */
+function extractYouTubeVideoId(input) {
+  if (!input) return '';
+  const trimmed = input.trim();
+  const match = trimmed.match(/(?:v=|\/live\/|\/watch\?v=|youtu\.be\/|\/v\/|\/embed\/)([A-Za-z0-9_-]{11})/);
+  if (match) return match[1];
+  return trimmed;
+}
+
 const params = new URLSearchParams(location.search);
-const TWITCH = (params.get('twitch') || '').toLowerCase().trim();
+const TWITCH = (params.get('twitch') || '').toLowerCase().replace(/^#/, '').trim();
 const YT_KEY = (params.get('yt_key') || '').trim();
-const YT_VID = (params.get('yt_vid') || '').trim();
-const KICK = (params.get('kick') || '').toLowerCase().trim();
+const YT_VID = extractYouTubeVideoId(params.get('yt_vid') || '');
+const KICK = (params.get('kick') || '').toLowerCase().replace(/^@/, '').replace(/^#/, '').trim();
 const KICK_ID = (params.get('kick_id') || '').trim();
 const BRAND_AVATAR = (params.get('avatar') || params.get('logo') || params.get('brand_avatar') || '').trim();
 
@@ -1678,9 +1683,12 @@ function connectTwitch(rawChannel) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   19. KICK PUSHER WEBSOCKET
+   19. KICK PUSHER WEBSOCKET ENGINE (2026 CLUSTER US2)
 ═══════════════════════════════════════════════════════════ */
-async function connectKick(channel, directChatroomId = null) {
+async function connectKick(rawChannel, directChatroomId = null) {
+  const channel = (rawChannel || '').toLowerCase().replace(/^@/, '').replace(/^#/, '').trim();
+  if (!channel && !directChatroomId) return;
+
   setSourceState('kick', 'Kick', `connecting #${channel || directChatroomId}…`, false);
 
   let targetChatroomId = directChatroomId;
@@ -1689,15 +1697,30 @@ async function connectKick(channel, directChatroomId = null) {
     targetChatroomId = channel;
   }
 
-  const PUSHER_KEY = 'eb1d5f283081a78b932c';
+  // Attempt resolving channel username to numeric chatroom ID if needed
+  if (!targetChatroomId && channel) {
+    try {
+      const res = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(channel)}`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.chatroom?.id) targetChatroomId = String(data.chatroom.id);
+      }
+    } catch {}
+  }
+
+  const PUSHER_KEY = '32cbd69e4b950bf97679';
   let ws;
   try {
     ws = new WebSocket(`wss://ws-us2.pusher.com/app/${PUSHER_KEY}?protocol=7&client=js&version=7.6.0&flash=false`);
   } catch (e) {
+    console.warn('[Kick Pusher] WebSocket creation error:', e);
     setSourceState('kick', 'Kick', 'unavailable', false);
     return;
   }
 
+  let pingTimer = null;
   let connectionTimeout = setTimeout(() => {
     setSourceState('kick', 'Kick', 'timeout — retrying…', false);
     try { ws.close(); } catch {}
@@ -1706,10 +1729,25 @@ async function connectKick(channel, directChatroomId = null) {
   ws.onopen = () => {
     clearTimeout(connectionTimeout);
     retryDelays.kick = 2000;
-    const channelName = targetChatroomId ? `chatrooms.${targetChatroomId}.v2` : `channel.${channel}`;
-    ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: channelName } }));
+
+    // Subscribe to chatroom channels
+    if (targetChatroomId) {
+      ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: `chatrooms.${targetChatroomId}.v2` } }));
+      ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: `chatrooms.${targetChatroomId}` } }));
+    }
+    if (channel) {
+      ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: `channel.${channel}` } }));
+    }
+
     setSourceState('kick', 'Kick', `#${channel || targetChatroomId}`, true);
     guide.style.display = 'none';
+
+    // Keepalive ping every 30s
+    pingTimer = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        try { ws.send(JSON.stringify({ event: 'pusher:ping', data: {} })); } catch {}
+      }
+    }, 30000);
   };
 
   ws.onmessage = ({ data: rawData }) => {
@@ -1717,18 +1755,19 @@ async function connectKick(channel, directChatroomId = null) {
       const event = JSON.parse(rawData);
 
       if (event.event === 'pusher:ping') {
-        ws.send(JSON.stringify({ event: 'pusher:pong', data: {} }));
+        try { ws.send(JSON.stringify({ event: 'pusher:pong', data: {} })); } catch {}
         return;
       }
 
-      const isKickChatMsg = (
+      // Kick Chat Message
+      const isKickChat = (
         event.event === 'App\\Events\\ChatMessageEvent' ||
         event.event === 'ChatMessageEvent' ||
         event.event === 'chatroom.message' ||
         (event.event && event.event.toLowerCase().includes('chatmessage'))
       );
 
-      if (isKickChatMsg) {
+      if (isKickChat) {
         const message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (!message) return;
         const user = message.sender?.username || message.user?.username || 'User';
@@ -1747,26 +1786,86 @@ async function connectKick(channel, directChatroomId = null) {
         if (isVip) badges.push('vip');
 
         enqueueMessage({ user, text: textContent, badges, emotes: {}, platform: 'kick', avatarUrl });
+        return;
+      }
+
+      // Kick Gifted Subs
+      if (event.event && event.event.includes('GiftedSubscriptionsEvent')) {
+        const d = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        const gifter = d.gifter_username || d.custom_clipper_name || 'Community Member';
+        const giftCount = d.gifted_usernames?.length || d.count || 1;
+        enqueueMessage({
+          user: gifter,
+          platform: 'kick',
+          isEvent: true,
+          eventIcon: '🎁',
+          eventTitle: 'Community Gift Subs',
+          eventSubtitle: `${gifter} gifted ${giftCount} Sub${giftCount > 1 ? 's' : ''} to the channel!`,
+          eventAmount: `${giftCount} GIFT SUB${giftCount > 1 ? 'S' : ''}`,
+        });
+        return;
+      }
+
+      // Kick Direct Subscriptions
+      if (event.event && (event.event.includes('SubscriptionEvent') || event.event.includes('Subscription'))) {
+        const d = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        const subUser = d.username || d.user?.username || 'Subscriber';
+        const months = d.months || 1;
+        enqueueMessage({
+          user: subUser,
+          platform: 'kick',
+          isEvent: true,
+          eventIcon: '🌟',
+          eventTitle: months > 1 ? 'Resubscription' : 'New Subscription',
+          eventSubtitle: months > 1 ? `${subUser} subscribed for ${months} months!` : `${subUser} just subscribed on Kick!`,
+          eventAmount: months > 1 ? `${months} MONTHS` : 'TIER 1 SUB',
+        });
+        return;
+      }
+
+      // Kick Hosts & Raids
+      if (event.event && event.event.includes('StreamHostEvent')) {
+        const d = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        const hoster = d.host_username || 'Host';
+        const viewers = d.number_viewers || d.viewers || '';
+        enqueueMessage({
+          user: hoster,
+          platform: 'kick',
+          isEvent: true,
+          eventIcon: '⚡',
+          eventTitle: 'Incoming Host',
+          eventSubtitle: viewers ? `${hoster} hosted with ${viewers} viewers!` : `${hoster} is hosting the stream!`,
+          eventAmount: viewers ? `${viewers} VIEWERS` : 'HOST',
+        });
       }
     } catch (e) {}
   };
 
-  ws.onerror = () => {
+  ws.onerror = (err) => {
     clearTimeout(connectionTimeout);
-    setSourceState('kick', 'Kick', 'unavailable', false);
+    if (pingTimer) clearInterval(pingTimer);
+    console.warn('[Kick Pusher] Error:', err);
+    setSourceState('kick', 'Kick', 'connection error', false);
   };
-  ws.onclose = () => {
+
+  ws.onclose = (ev) => {
     clearTimeout(connectionTimeout);
+    if (pingTimer) clearInterval(pingTimer);
+    console.warn('[Kick Pusher] Closed (code ' + ev.code + ') — reconnecting...');
     setSourceState('kick', 'Kick', 'reconnecting…', false);
     scheduleReconnect('kick', () => connectKick(channel, targetChatroomId));
   };
 }
 
 /* ═══════════════════════════════════════════════════════════
-   20. YOUTUBE DATA API V3
+   20. YOUTUBE DATA API V3 POLLING ENGINE
 ═══════════════════════════════════════════════════════════ */
+const seenYouTubeIds = new Set();
+
 async function connectYouTube(videoId, apiKey) {
+  if (!videoId || !apiKey) return;
   setSourceState('youtube', 'YouTube', 'connecting…', false);
+
   try {
     const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${encodeURIComponent(videoId)}&key=${encodeURIComponent(apiKey)}`);
     const data = await response.json().catch(() => ({}));
@@ -1793,16 +1892,23 @@ async function connectYouTube(videoId, apiKey) {
         if (!res.ok || chatData.error) {
           const reason = chatData.error?.errors?.[0]?.reason || '';
           if (reason === 'quotaExceeded') {
-            setSourceState('youtube', 'YouTube', 'API Quota Exceeded', false);
+            setSourceState('youtube', 'YouTube', 'API quota exceeded', false);
             return;
           }
-          setSourceState('youtube', 'YouTube', 'API error / retrying', false);
+          setSourceState('youtube', 'YouTube', 'retrying…', false);
           scheduleReconnect('youtube', () => connectYouTube(videoId, apiKey));
           return;
         }
 
         pageToken = chatData.nextPageToken || '';
         (chatData.items || []).forEach((item) => {
+          if (!item.id || seenYouTubeIds.has(item.id)) return;
+          seenYouTubeIds.add(item.id);
+          if (seenYouTubeIds.size > 300) {
+            const first = seenYouTubeIds.values().next().value;
+            seenYouTubeIds.delete(first);
+          }
+
           const snippet = item.snippet || {};
           const author = item.authorDetails?.displayName || 'User';
           const message = item.snippet?.displayMessage || '';
@@ -1816,24 +1922,26 @@ async function connectYouTube(videoId, apiKey) {
           const superChat = snippet.superChatDetails || {};
           const milestone = snippet.memberMilestoneChatDetails || snippet.newSponsorDetails || snippet.giftMembershipReceivedDetails || snippet.membershipGiftingDetails || snippet.superStickerDetails || {};
 
+          // SuperChat & SuperStickers
           if (/superchat|supersticker/.test(eventType)) {
             enqueueMessage({
               user: author,
               platform: 'youtube',
               avatarUrl,
               isEvent: true,
-              eventIcon: '💬',
+              eventIcon: '💎',
               eventTitle: 'Super Chat',
               eventSubtitle: superChat.userComment || message || 'Super Chat sent!',
               eventMeta: [
                 superChat.amountDisplayString ? { label: superChat.amountDisplayString, kind: 'amount' } : null,
                 superChat.tier ? { label: `Tier ${superChat.tier}`, kind: 'tier' } : null,
               ].filter(Boolean),
-              eventAmount: superChat.amountDisplayString || superChat.purchaseAmountText || '',
+              eventAmount: superChat.amountDisplayString || superChat.purchaseAmountText || '$',
             });
             return;
           }
 
+          // Memberships & Milestones
           if (/member|sponsor|gift/.test(eventType)) {
             enqueueMessage({
               user: author,
@@ -1842,11 +1950,12 @@ async function connectYouTube(videoId, apiKey) {
               isEvent: true,
               eventIcon: '🎖️',
               eventTitle: 'Membership Event',
-              eventSubtitle: message || milestone.userComment || `${author} joined as a member!`,
+              eventSubtitle: message || milestone.userComment || `${author} joined as a channel member!`,
               eventMeta: [
                 milestone.memberLevelName ? { label: milestone.memberLevelName, kind: 'tier' } : null,
                 milestone.months ? { label: `${milestone.months} months`, kind: 'count' } : null,
               ].filter(Boolean),
+              eventAmount: 'MEMBER',
             });
             return;
           }
@@ -1854,24 +1963,19 @@ async function connectYouTube(videoId, apiKey) {
           enqueueMessage({ user: author, text: message, badges, emotes: {}, platform: 'youtube', avatarUrl });
         });
 
-        const delay = Math.max(Number(chatData.pollingIntervalMillis || 4500), 3000);
-        if (document.visibilityState === 'hidden') {
-          const onVisible = () => {
-            document.removeEventListener('visibilitychange', onVisible);
-            reconnectTimers.youtube = setTimeout(poll, 1000);
-          };
-          document.addEventListener('visibilitychange', onVisible);
-        } else {
-          reconnectTimers.youtube = setTimeout(poll, delay);
-        }
-      } catch {
+        // Continuous streaming in OBS without freezing in background
+        const delay = Math.max(Number(chatData.pollingIntervalMillis || 3500), 2000);
+        reconnectTimers.youtube = setTimeout(poll, delay);
+      } catch (err) {
+        console.warn('[YouTube API] Polling error:', err);
         setSourceState('youtube', 'YouTube', 'reconnecting…', false);
         scheduleReconnect('youtube', () => connectYouTube(videoId, apiKey));
       }
     }
 
     poll();
-  } catch {
+  } catch (err) {
+    console.warn('[YouTube API] Init error:', err);
     setSourceState('youtube', 'YouTube', 'failed to connect', false);
   }
 }
