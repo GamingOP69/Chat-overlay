@@ -1,54 +1,76 @@
-# How To Use — StreamChat Pro Gamer HUD Overlay
+# StreamChat Overlay — Architecture & Workflow
 
 ```mermaid
 flowchart TD
-  A[Open index.html Command Deck] --> B[Enter Twitch, YouTube, and/or Kick channel]
-  B --> C[Select 1 of 10 Pro Gamer Themes & 60fps Animation]
-  C --> D[Customize Typography, Opacity, Text Stroke, Badges & FM Synth Audio]
-  D --> E[Use Interactive Stream Test Deck to Preview Live Chats & Hype Alerts]
-  E --> F[Select OBS Resolution Preset & Copy Overlay URL]
-  F --> G[Add Browser Source in OBS Studio / Streamlabs]
-  G --> H[Crystal Clear Transparent Gamer HUD Live on Stream]
-```
-
-```mermaid
-flowchart LR
-  subgraph Config ["Command Deck (index.html)"]
-    S1[Multi-Platform Inputs]
-    S2[Interactive Test Deck]
-    S3[10-Theme Customizer]
-    S4[Generate Secure URL]
+  subgraph Config ["Command Deck UI (index.html)"]
+    A[Configure Platform Usernames & IDs] --> B[Pick from 10 Pro Gamer HUD Themes]
+    B --> C[Customize Typography, Opacity, Stroke & FM Audio Profiles]
+    C --> D[Test Live with Interactive Stream Test Deck & Soundboard]
+    D --> E[Select OBS Resolution Preset & Copy Secure URL]
   end
 
   subgraph Engine ["Runtime HUD Engine (overlay.html)"]
-    R1[Read Parameters & Themes]
-    R2[Multi-Platform WebSockets / REST]
-    R3[60+ Emote Engine + 7TV / BTTV / FFZ]
-    R4[BigEmote Scaler & Word Filter]
-    R5[Smooth 60fps Queue & Scrollback Buffer]
-    R6[Multi-Tier Event Alerts & Highlights]
-    R7[Procedural Web Audio FM Synthesizer]
+    F[Read URL Search Parameters] --> G[Initialize 10 HUD Themes & Custom CSS]
+    G --> H[Connect Multi-Platform WebSockets / REST API]
+    H --> I[60+ Emote Dictionary + 7TV / BTTV / FFZ Live Engine]
+    I --> J[BigEmote Scaler & Word Censorship Filter]
+    J --> K[Hardware-Accelerated 60fps Animations & Queue]
+    K --> L[Multi-Tier Event Alerts & Procedural FM Synthesizer]
   end
 
-  S1 --> S2 --> S3 --> S4 --> R1 --> R2 --> R3 --> R4 --> R5 --> R6 --> R7
+  subgraph Stream ["OBS Studio / Streamlabs"]
+    M[Add Browser Source with URL] --> N[Overlay Appears with Transparent Background]
+    N --> O[Crisp High-Contrast HUD Floating Live on Stream]
+  end
+
+  E --> F
+  L --> M
 ```
 
-## URL Parameter Examples
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Streamer as Streamer (Browser / OBS)
+  participant Deck as Command Deck (index.html)
+  participant Overlay as Overlay HUD (overlay.html)
+  participant Platforms as Twitch / YouTube / Kick APIs
+  participant EmoteAPIs as 7TV / BTTV / FFZ CDNs
+
+  Streamer->>Deck: Select Theme & Parameters
+  Deck->>Overlay: postMessage({ kind: 'config_update' })
+  Overlay-->>Deck: Reactive Live Preview Updated (Zero Lag)
+  
+  Streamer->>Deck: Click '💬 Chat' or '🎁 Gift' in Test Deck
+  Deck->>Overlay: postMessage({ kind: 'chat' / 'event' })
+  Overlay->>Overlay: Play Procedural FM Synth Tone & Animate Card
+
+  Streamer->>Overlay: Launches Browser Source in OBS Studio
+  Overlay->>Platforms: Connect Twitch (IRC) + YouTube (API) + Kick (Pusher)
+  Overlay->>EmoteAPIs: Fetch 7TV, BTTV, FFZ Channel & Global Emotes
+  Platforms-->>Overlay: Incoming Chat Messages & Hype Events
+  Overlay->>Overlay: Parse Badges, Emotes, BigEmotes & Render 60fps HUD
+```
+
+---
+
+## ⚡ URL Parameters Quick Sheet
 
 ```text
-overlay.html?twitch=tarik&theme=neon&anim=glitch&pos=right&size=14&dur=25&max=20&stroke=1
-overlay.html?twitch=shroud&theme=stealth&font=inter&opacity=0&stroke=1&sound_profile=ping
-overlay.html?kick=xqc&kick_id=123456&theme=valorant&anim=slide&sound_profile=coin
+# Pro Gamer Cyberpunk (Twitch + Kick Dual Stream)
+overlay.html?twitch=tarik&kick=xqc&theme=neon&anim=glitch&sound_profile=cyber
+
+# Tactical Valorant Style (with high-contrast black outline)
+overlay.html?twitch=shroud&theme=valorant&anim=slide&stroke=1&sound_profile=ping
+
+# OLED Stealth Minimal (0% transparent floating text)
+overlay.html?twitch=tarik&theme=stealth&opacity=0&stroke=1&font=inter
+
+# Magma Apex Champion Style
+overlay.html?kick=trainwreck&theme=fire&anim=pop&sound_profile=coin
+
+# YouTube Live with SuperChat Alerts
 overlay.html?yt_key=AIzaSy...&yt_vid=dQw4w9WgXcQ&theme=glass&font=chakra
+
+# Offline Simulation / Demo Mode
 overlay.html?demo=1&theme=synthwave&anim=glitch&sound_profile=cyber&status=1
 ```
-
-## Features Summary
-
-- **60+ Built-in + 7TV / BTTV / FFZ Animated Emotes:** Instant live rendering of top streamer emotes with zero latency.
-- **BigEmote Auto-Scaling:** Messages with 1–3 emotes automatically scale to 1.8x size.
-- **Card Background Opacity & Stroke:** Adjust from 100% solid HUD card to 0% pure floating text with high-contrast drop outline.
-- **Hardware Glitch & 60fps Animations:** Smooth GPU-accelerated RGB displacement without CSS clipping corruption.
-- **Procedural FM Synthesizer:** 6 custom synthesized sound profiles (`cyber`, `coin`, `chime`, `ping`, `pop`, `mute`).
-- **Interactive Stream Test Deck:** Test incoming chats, subs, gift sub bombs, raids, and SuperChats with 1 click.
-- **Zero Dependencies:** Pure HTML5 / CSS3 / ES2022.

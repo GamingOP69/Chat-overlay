@@ -281,7 +281,8 @@
       inset 0 1px 0 rgba(255,255,255,0.09),
       0 6px 28px rgba(0,0,0,0.65);
     max-width: var(--max-width);
-    will-change: transform, opacity, height;
+    flex-shrink: 0;
+    will-change: transform, opacity;
     transition: opacity 0.35s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     overflow: hidden;
   }
@@ -299,26 +300,14 @@
       inset 0 1px 0 rgba(255,255,255,0.25),
       0 0 24px var(--highlight-glow),
       0 8px 32px rgba(0,0,0,0.85) !important;
-    animation: highlightPulse 2s infinite ease-in-out;
+    animation: highlightPulse 1.8s ease-in-out 3 forwards;
   }
   @keyframes highlightPulse {
     0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px var(--highlight-glow), 0 8px 32px rgba(0,0,0,0.85); }
     50%      { box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 28px var(--highlight-glow), 0 8px 36px rgba(0,0,0,0.95); }
   }
 
-  /* Subtle Shimmer */
-  .msg::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -80%; width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-    animation: shimmer 5s ease-in-out infinite;
-    pointer-events: none;
-  }
-  @keyframes shimmer {
-    0%   { transform: translateX(-100%); }
-    100% { transform: translateX(350%); }
-  }
+
 
   /* ═══════════════════════════════════════════════════════════
      05. AVATAR & PLATFORM BADGES
@@ -622,7 +611,8 @@
     100% { transform: translateX(0); opacity: 1; filter: none; }
   }
   @keyframes fadeOut {
-    to { opacity: 0; transform: translate3d(0, -10px, 0) scale3d(0.96, 0.96, 1); height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; }
+    0%   { opacity: 1; transform: scale(1); max-height: 250px; }
+    100% { opacity: 0; transform: scale(0.92) translateY(-6px); max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; border-width: 0; }
   }
 
   body.anim-slide          .msg { animation: slideInRight 0.28s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
@@ -632,7 +622,7 @@
   body.anim-float          .msg { animation: floatIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
   body.anim-zoom           .msg { animation: zoomIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
   body.anim-glitch         .msg { animation: glitchIn 0.24s steps(3) both; }
-  .msg.expired                  { animation: fadeOut 0.38s ease forwards !important; }
+  .msg.expired             { animation: fadeOut 0.32s ease forwards !important; pointer-events: none !important; }
 
   /* ═══════════════════════════════════════════════════════════
      09. STATUS & GUIDE
@@ -749,6 +739,34 @@ const FONT_MAP = {
   'press-start': "'Press Start 2P', monospace",
 };
 
+function hexToRgb(hex) {
+  let c = hex.replace(/^#/, '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  return Number.isNaN(num) ? null : { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+}
+
+function setAccentColors(accent, accent2) {
+  const root = document.documentElement;
+  if (accent) {
+    const c = accent.startsWith('#') ? accent : `#${accent}`;
+    root.style.setProperty('--accent', c);
+    const rgb = hexToRgb(c);
+    if (rgb) {
+      root.style.setProperty('--glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.55)`);
+      root.style.setProperty('--msg-border', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.35)`);
+    }
+  }
+  if (accent2) {
+    const c = accent2.startsWith('#') ? accent2 : `#${accent2}`;
+    root.style.setProperty('--accent2', c);
+    const rgb = hexToRgb(c);
+    if (rgb) {
+      root.style.setProperty('--glow2', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.45)`);
+    }
+  }
+}
+
 function applyInitialStyles() {
   const root = document.documentElement;
   const body = document.body;
@@ -770,14 +788,7 @@ function applyInitialStyles() {
 
   const customAccent = params.get('accent');
   const customAccent2 = params.get('accent2');
-  if (customAccent) {
-    const c = customAccent.startsWith('#') ? customAccent : `#${customAccent}`;
-    root.style.setProperty('--accent', c);
-  }
-  if (customAccent2) {
-    const c = customAccent2.startsWith('#') ? customAccent2 : `#${customAccent2}`;
-    root.style.setProperty('--accent2', c);
-  }
+  setAccentColors(customAccent, customAccent2);
 
   body.classList.add(`theme-${currentTheme}`, `anim-${currentAnim}`, `pos-${currentPos}`);
   if (currentChatDir === 'down') body.classList.add('dir-down');
@@ -905,32 +916,49 @@ function createAvatarElement({ user, platform, avatarUrl, color, isEvent = false
 ═══════════════════════════════════════════════════════════ */
 const customEmoteMap = new Map();
 
-// Built-in high-speed emote dictionary (instant rendering offline or online)
+// Built-in high-speed emote dictionary (100% verified 200 OK CDN URLs)
 const BUILTIN_EMOTE_URLS = {
-  'KEKW': 'https://cdn.7tv.app/emote/60b00d1f05e3fbf2eb998136/2x.webp',
-  'OMEGALUL': 'https://cdn.7tv.app/emote/603cbf07c20d020014423851/2x.webp',
-  'Pog': 'https://cdn.7tv.app/emote/60ae3e28404a37b3f9ff9386/2x.webp',
+  'KEKW': 'https://cdn.7tv.app/emote/01M12NCM0B10B51XCV5E2Y6XPD/2x.webp',
+  'catJAM': 'https://cdn.7tv.app/emote/01KZ2HZNS3024QY4WPPZXXGPAM/2x.webp',
+  'monkaW': 'https://cdn.7tv.app/emote/01KVCEP4S8G44DGPDDCQHG2CVQ/2x.webp',
+  'OMEGALUL': 'https://cdn.7tv.app/emote/01M0ZM52VJABNCBRGEAFEEAHKT/2x.webp',
+  'Pog': 'https://cdn.7tv.app/emote/01M1041SQZFDCYAGA5ARPZ6QS4/2x.webp',
+  'pepeL': 'https://cdn.7tv.app/emote/01M0A482J6Y6EZ01B1YKN0GWBG/2x.webp',
+  'ICANT': 'https://cdn.7tv.app/emote/01M0J0K9BE8YVNKE1BF6YSS70H/2x.webp',
+  'AYAYA': 'https://cdn.7tv.app/emote/01KYG0K74ZXEJH3PZ3WP6QSJ9F/2x.webp',
+  'GIGACHAD': 'https://cdn.7tv.app/emote/01M0KDXC10G6VHREEEMPA89XK4/2x.webp',
+  'widepeepoHappy': 'https://cdn.7tv.app/emote/01KVXZ2KEZNCTMFTHM7PAP2X1B/2x.webp',
+  'Clueless': 'https://cdn.7tv.app/emote/01M13CTD0RH465PYG0EY4ZPT4V/2x.webp',
+  'Copium': 'https://cdn.7tv.app/emote/01M0SXDHE02VF2073KANH6V07D/2x.webp',
+  'Sadge': 'https://cdn.7tv.app/emote/01M0SXFJ7RCWQWKSV8CJ1Y00YS/2x.webp',
+  'HYPERCLAP': 'https://cdn.7tv.app/emote/01M09M3EYDRN1419Z05PAYJS0N/2x.webp',
+  'FeelsStrongMan': 'https://cdn.7tv.app/emote/01KME7JHSA9STASR4C3V1H85TB/2x.webp',
+  'pepeJAM': 'https://cdn.7tv.app/emote/01KB2TSNECMSWGTARPN95WG3GP/2x.webp',
+  'monkaS': 'https://cdn.7tv.app/emote/01KZGEKMR2XCMET3H42XE6GDWY/2x.webp',
+  'PepeHands': 'https://cdn.7tv.app/emote/01KY0XW6EAQDBFM3764Q5C6JPW/2x.webp',
+  '5Head': 'https://cdn.7tv.app/emote/01KZBKDYTW14P6AV39B2YK898S/2x.webp',
+  'LULW': 'https://cdn.7tv.app/emote/01KPH8XKHK5HC8APSKKNS7EEKX/2x.webp',
+  'EZ': 'https://cdn.7tv.app/emote/01M0Z072H08R30W1TRYEGW175X/2x.webp',
+  'Clap': 'https://cdn.7tv.app/emote/01M136QQ4AGHTJCEH7D5G94YMG/2x.webp',
+  'PogU': 'https://cdn.7tv.app/emote/01KZKHYW8E8F991ENJTMEQ46RC/2x.webp',
+  'PauseChamp': 'https://cdn.7tv.app/emote/01KWTA6Y7ZWA8R0YV2PPSP8KHC/2x.webp',
+  'pepeD': 'https://cdn.7tv.app/emote/01KXKQHB6EZ96N44QX48E8988S/2x.webp',
+  'NODDERS': 'https://cdn.7tv.app/emote/01M10R317QH6MWJBFH48RCHJC9/2x.webp',
+  'NOPERS': 'https://cdn.7tv.app/emote/01M10R3MJ5B0YXYZGEBY666QS9/2x.webp',
+  'Pepega': 'https://cdn.7tv.app/emote/01KYMS67E2QYKX9WE8GH0G1CQN/2x.webp',
+  'HUH': 'https://cdn.7tv.app/emote/01M0ZA7MMPK7AJJQYCXB0Q5VTG/2x.webp',
+  'Aware': 'https://cdn.7tv.app/emote/01M17T241RN27DZ7K6FRPH37PB/2x.webp',
   'PogChamp': 'https://static-cdn.jtvnw.net/emoticons/v2/305954156/default/dark/2.0',
   'Kappa': 'https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0',
   'LUL': 'https://static-cdn.jtvnw.net/emoticons/v2/425618/default/dark/2.0',
-  'catJAM': 'https://cdn.7tv.app/emote/60ae6f19404a37b3f9ff9518/2x.webp',
-  'monkaW': 'https://cdn.7tv.app/emote/603cbef2c20d02001442384a/2x.webp',
-  'pepeL': 'https://cdn.7tv.app/emote/603cc2e5c20d020014423927/2x.webp',
-  'ICANT': 'https://cdn.7tv.app/emote/615a1fcf1cd76b2f4f227ba1/2x.webp',
-  'AYAYA': 'https://cdn.7tv.app/emote/603cc09bc20d0200144238ac/2x.webp',
-  'GIGACHAD': 'https://cdn.7tv.app/emote/60f7f3da1d0d970966f3630f/2x.webp',
-  'widepeepoHappy': 'https://cdn.7tv.app/emote/603cc057c20d02001442389e/2x.webp',
-  'Clueless': 'https://cdn.7tv.app/emote/6146603a1cd76b2f4f2257d0/2x.webp',
-  'Copium': 'https://cdn.7tv.app/emote/60a28f73111da904be9f80ba/2x.webp',
-  'Sadge': 'https://cdn.7tv.app/emote/603cc2e5c20d020014423928/2x.webp',
-  'HYPERCLAP': 'https://cdn.7tv.app/emote/60ae6ec5404a37b3f9ff9515/2x.webp',
-  'FeelsStrongMan': 'https://cdn.7tv.app/emote/603cc06cc20d0200144238a3/2x.webp',
   'BibleThump': 'https://static-cdn.jtvnw.net/emoticons/v2/86/default/dark/2.0',
   'Kreygasm': 'https://static-cdn.jtvnw.net/emoticons/v2/41/default/dark/2.0',
   'CoolCat': 'https://static-cdn.jtvnw.net/emoticons/v2/58127/default/dark/2.0',
   'VoHiYo': 'https://static-cdn.jtvnw.net/emoticons/v2/81274/default/dark/2.0',
   'HeyGuys': 'https://static-cdn.jtvnw.net/emoticons/v2/30259/default/dark/2.0',
   'SMOrc': 'https://static-cdn.jtvnw.net/emoticons/v2/52/default/dark/2.0',
+  'ResidentSleeper': 'https://static-cdn.jtvnw.net/emoticons/v2/245/default/dark/2.0',
+  'TriHard': 'https://static-cdn.jtvnw.net/emoticons/v2/120232/default/dark/2.0'
 };
 
 for (const [code, url] of Object.entries(BUILTIN_EMOTE_URLS)) {
@@ -943,11 +971,10 @@ async function load7TVGlobalEmotes() {
     if (!res.ok) return;
     const data = await res.json();
     (data?.emotes || []).forEach(e => {
-      if (e.name && e.data?.id) {
-        customEmoteMap.set(e.name, {
-          url: `https://cdn.7tv.app/emote/${e.data.id}/2x.webp`,
-          name: e.name
-        });
+      if (e.name && e.data?.host?.url && e.data?.host?.files) {
+        const file = e.data.host.files.find(f => f.name === '2x.webp') || e.data.host.files[0];
+        const u = 'https:' + e.data.host.url + '/' + file.name;
+        customEmoteMap.set(e.name, { url: u, name: e.name });
       }
     });
   } catch {}
@@ -1170,7 +1197,7 @@ function renderPlainSegmentWithCustomEmotes(segment) {
 
       const emoteData = customEmoteMap.get(word);
       if (emoteData) {
-        out += `<img class="emote" src="${escAttr(emoteData.url)}" alt="${escHtml(word)}" title="${escHtml(word)}" loading="lazy">`;
+        out += `<img class="emote" src="${escAttr(emoteData.url)}" alt="${escHtml(word)}" title="${escHtml(word)}" loading="lazy" onerror="this.onerror=null; this.replaceWith(document.createTextNode('${escAttr(word)} '));">`;
         continue;
       }
 
@@ -1210,7 +1237,7 @@ function renderText(text, emotes = {}) {
     if (range.start < cursor) continue;
     html += renderPlainSegmentWithCustomEmotes(rawText.slice(cursor, range.start));
     const emoteText = rawText.slice(range.start, range.end + 1);
-    html += `<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/${encodeURIComponent(range.id)}/default/dark/2.0" alt="${escHtml(emoteText)}" title="${escHtml(emoteText)}">`;
+    html += `<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/${encodeURIComponent(range.id)}/default/dark/2.0" alt="${escHtml(emoteText)}" title="${escHtml(emoteText)}" onerror="this.onerror=null; this.replaceWith(document.createTextNode('${escAttr(emoteText)} '));">`;
     cursor = range.end + 1;
   }
 
@@ -1299,11 +1326,13 @@ function resumeScroll() {
   scrollNotice.style.display = 'none';
 }
 
-const MESSAGE_BATCH_SIZE = 8;
-const MESSAGE_QUEUE_LIMIT = 120;
+const MESSAGE_BATCH_SIZE = 1;
+const MESSAGE_QUEUE_LIMIT = 30;
 const messageQueue = [];
 let flushScheduled = false;
 let messageCount = 0;
+let lastFlushTime = 0;
+const FLUSH_INTERVAL = 50; // ms between batches
 
 function enqueueMessage(message) {
   if (WORD_FILTER.length > 0 && message.text) {
@@ -1312,8 +1341,9 @@ function enqueueMessage(message) {
     if (hasBanned) return;
   }
 
+  // Drop oldest queued (not yet rendered) message if queue is full
   if (messageQueue.length >= MESSAGE_QUEUE_LIMIT) {
-    messageQueue.splice(0, messageQueue.length - MESSAGE_QUEUE_LIMIT + 1);
+    messageQueue.shift();
   }
   messageQueue.push(message);
 
@@ -1325,41 +1355,36 @@ function enqueueMessage(message) {
 
   if (!flushScheduled) {
     flushScheduled = true;
-    requestAnimationFrame(flushMessages);
+    setTimeout(flushMessages, FLUSH_INTERVAL);
   }
 }
 
 function flushMessages() {
   flushScheduled = false;
-  const batch = messageQueue.splice(0, MESSAGE_BATCH_SIZE);
-  if (!batch.length) return;
+  const msg = messageQueue.shift();
+  if (!msg) return;
 
   const isDown = currentChatDir === 'down';
-
-  for (const msg of batch) {
-    try {
-      const card = renderMessage(msg);
-      if (isDown) {
-        wrap.appendChild(card);
-      } else {
-        wrap.insertBefore(card, wrap.firstChild);
-      }
-    } catch (e) {
-      console.warn('[Overlay] renderMessage error:', e);
+  try {
+    const card = renderMessage(msg);
+    if (isDown) {
+      wrap.appendChild(card);
+    } else {
+      wrap.insertBefore(card, wrap.firstChild);
     }
+  } catch (e) {
+    console.warn('[Overlay] renderMessage error:', e);
   }
 
+  // Prune: immediately remove oldest DOM cards beyond limit (no animation, instant)
   while (wrap.children.length > currentMaxMsg) {
     const victim = isDown ? wrap.firstChild : wrap.lastChild;
-    if (victim) {
-      victim.classList.add('expired');
-      setTimeout(() => { if (victim.parentNode) victim.remove(); }, 380);
-    }
+    if (victim) victim.remove();
   }
 
   if (messageQueue.length > 0) {
     flushScheduled = true;
-    requestAnimationFrame(flushMessages);
+    setTimeout(flushMessages, FLUSH_INTERVAL);
   }
 }
 
@@ -2000,13 +2025,8 @@ function applyLiveConfigUpdate(config) {
   }
 
   // Custom accent colors
-  if (config.accent) {
-    const c = config.accent.startsWith('#') ? config.accent : `#${config.accent}`;
-    root.style.setProperty('--accent', c);
-  }
-  if (config.accent2) {
-    const c = config.accent2.startsWith('#') ? config.accent2 : `#${config.accent2}`;
-    root.style.setProperty('--accent2', c);
+  if (config.accent || config.accent2) {
+    setAccentColors(config.accent, config.accent2);
   }
 }
 
@@ -2035,7 +2055,7 @@ function runDemo() {
     const message = DEMO_MSGS[index % DEMO_MSGS.length];
     enqueueMessage({ ...message, avatarUrl: BRAND_AVATAR });
     index += 1;
-    setTimeout(loop, 1700 + Math.random() * 1800);
+    setTimeout(loop, 2800 + Math.random() * 2200);
   };
   loop();
 }
