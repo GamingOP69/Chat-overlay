@@ -3,927 +3,1645 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StreamChat Overlay — Setup</title>
+<title>StreamChat Overlay — Pro Gamer Command Deck</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Nunito:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,700&family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Press+Start+2P&family=Rajdhani:wght@500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --bg: #070b14;
-    --surface: #0d1424;
-    --surface2: #131d32;
-    --border: rgba(255,255,255,0.07);
-    --accent: #a855f7;
-    --accent2: #06b6d4;
-    --accent3: #f472b6;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --glow: rgba(168,85,247,0.35);
-    --glow2: rgba(6,182,212,0.25);
-    --radius: 14px;
+/* ═══════════════════════════════════════════════════════════
+   01. DESIGN SYSTEM VARIABLES & RESET
+═══════════════════════════════════════════════════════════ */
+:root {
+  --bg: #03060a;
+  --surface: #070d18;
+  --surface2: #0b1322;
+  --surface3: #101c33;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(0, 240, 255, 0.35);
+  --accent: #00f0ff;
+  --accent2: #ff007f;
+  --accent3: #fcee0a;
+  --accent-purple: #9147ff;
+  --accent-green: #53b94f;
+  --text: #f1f5f9;
+  --text-dim: #94a3b8;
+  --muted: #475569;
+  --glow: rgba(0, 240, 255, 0.45);
+  --glow-soft: rgba(0, 240, 255, 0.15);
+  --sidebar-w: 440px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   02. CYBERPUNK AMBIENT BACKGROUND
+═══════════════════════════════════════════════════════════ */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.032) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, black 40%, transparent 100%);
+}
+.bg-orb1 {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 650px; height: 650px; top: -200px; left: -150px;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, transparent 70%);
+  filter: blur(70px);
+}
+.bg-orb2 {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 550px; height: 550px; bottom: -150px; right: -100px;
+  background: radial-gradient(circle, rgba(255, 0, 127, 0.1) 0%, transparent 70%);
+  filter: blur(70px);
+}
+.scan-line {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+  animation: scanMove 10s linear infinite;
+}
+@keyframes scanMove { from { background-position: 0 0; } to { background-position: 0 120px; } }
+
+/* ═══════════════════════════════════════════════════════════
+   03. RESPONSIVE TWO-COLUMN LAYOUT
+═══════════════════════════════════════════════════════════ */
+.layout {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr var(--sidebar-w);
+  grid-template-areas: "config preview";
+  min-height: 100vh;
+}
+@media (max-width: 1120px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: "config" "preview";
+    --sidebar-w: 100%;
   }
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+.config-col {
+  grid-area: config;
+  padding: 28px 26px 80px;
+  max-width: 820px;
+  min-width: 0;
+}
 
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── BACKGROUND ────────────────────────────── */
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0;
-    background-image:
-      linear-gradient(rgba(168,85,247,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(168,85,247,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);
-  }
-  .bg-orb1, .bg-orb2 {
-    position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events: none;
-  }
-  .bg-orb1 { width: 500px; height: 500px; top: -200px; left: -100px; background: rgba(168,85,247,0.12); }
-  .bg-orb2 { width: 400px; height: 400px; bottom: -100px; right: -100px; background: rgba(6,182,212,0.1); }
-
-  /* ── LAYOUT ─────────────────────────────────── */
-  .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
-
-  /* ── HEADER ─────────────────────────────────── */
-  header { text-align: center; margin-bottom: 48px; }
-
-  .logo {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--muted);
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
-  }
-  .logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50; box-shadow: 0 0 8px var(--accent); animation: blink 2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(36px, 7vw, 64px);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1;
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .tagline {
-    color: var(--muted); font-size: 16px; font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  /* ── CARD ───────────────────────────────────── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 16px;
+.preview-col {
+  grid-area: preview;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: rgba(3, 6, 10, 0.75);
+  backdrop-filter: blur(16px);
+}
+@media (max-width: 1120px) {
+  .preview-col {
     position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
+    height: auto;
+    min-height: 520px;
+    border-left: none;
+    border-top: 1px solid var(--border);
   }
-  .card:hover { border-color: rgba(168,85,247,0.2); }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent);
-  }
+}
 
-  .card-title {
-    font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    font-size: 18px; letter-spacing: 0.05em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
-    color: var(--accent);
-  }
-  .card-title .icon { font-size: 20px; }
-  .card-title .badge-new {
-    font-size: 9px; background: var(--accent); color: #fff;
-    padding: 2px 7px; border-radius: 20px; letter-spacing: 0.08em;
-  }
+/* ═══════════════════════════════════════════════════════════
+   04. TOP NAVIGATION BAR
+═══════════════════════════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  height: 52px;
+  background: rgba(3, 6, 10, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 13px; letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.topbar-brand .brand-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e; box-shadow: 0 0 10px #22c55e;
+  animation: blink 1.8s infinite;
+}
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+.topbar-brand .brand-ver {
+  font-size: 9px; color: var(--muted); margin-left: 4px;
+  font-family: 'Space Mono', monospace; letter-spacing: 0.1em;
+}
+.topbar-nav { display: flex; align-items: center; gap: 2px; }
+.topbar-nav a {
+  font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); padding: 6px 10px;
+  text-decoration: none; border-radius: 3px;
+  transition: color 0.2s, background 0.2s;
+}
+.topbar-nav a:hover { color: var(--accent); background: rgba(0,240,255,0.08); }
+@media (max-width: 768px) { .topbar-nav { display: none; } }
 
-  /* ── PLATFORM TABS ──────────────────────────── */
-  .platform-tabs {
-    display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .ptab {
-    display: flex; align-items: center; gap: 6px;
-    padding: 8px 16px; border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    cursor: pointer; font-size: 13px; font-weight: 700;
-    letter-spacing: 0.04em; transition: all 0.2s;
-    font-family: 'Rajdhani', sans-serif;
-    user-select: none;
-  }
-  .ptab:hover { border-color: rgba(255,255,255,0.15); }
-  .ptab.active.twitch  { background: rgba(145,71,255,0.2); border-color: #9147ff; color: #bf94ff; }
-  .ptab.active.youtube { background: rgba(255,0,0,0.15);   border-color: #ff0000; color: #f87171; }
-  .ptab.active.kick    { background: rgba(83,185,79,0.15);  border-color: #53b94f; color: #4ade80; }
+/* ═══════════════════════════════════════════════════════════
+   05. HEADER BANNER
+═══════════════════════════════════════════════════════════ */
+.page-header { text-align: center; padding: 28px 0 24px; position: relative; }
+.sys-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Space Mono', monospace; font-weight: 700;
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(0,240,255,0.08);
+  border: 1px solid rgba(0,240,255,0.25);
+  padding: 4px 14px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  margin-bottom: 14px;
+}
+.sys-badge .sys-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; animation: blink 1.8s infinite; }
 
-  .platform-section { display: none; }
-  .platform-section.active { display: block; }
+.logo-container { position: relative; display: inline-block; margin-bottom: 8px; }
+.logo-text {
+  font-family: 'Orbitron', sans-serif; font-weight: 900;
+  font-size: clamp(24px, 4vw, 40px);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: linear-gradient(135deg, var(--accent) 0%, #7dd3fc 40%, var(--accent) 70%, var(--accent2) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(0,240,255,0.4));
+  line-height: 1.1;
+}
+.logo-sub {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  letter-spacing: 0.28em; color: var(--muted); text-transform: uppercase;
+}
+.tagline {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--muted); letter-spacing: 0.05em; margin-top: 10px;
+}
+.tagline .tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  padding: 2px 8px; margin: 2px 3px;
+  font-size: 9px; letter-spacing: 0.12em;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+}
 
-  .multi-note {
-    margin-bottom: 18px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  .multi-note strong { color: var(--text); }
+/* ═══════════════════════════════════════════════════════════
+   06. SECTION CARDS & CONTROLS
+═══════════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: border-color 0.25s;
+}
+.card:hover { border-color: rgba(0,240,255,0.2); }
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 30%, var(--accent2) 70%, transparent 100%);
+  opacity: 0.35;
+}
 
-  /* ── FORM ELEMENTS ──────────────────────────── */
-  .field-group { display: grid; gap: 12px; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.card-title {
+  font-family: 'Rajdhani', sans-serif; font-weight: 700;
+  font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px; color: var(--text);
+}
+.card-step {
+  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
+  color: var(--accent); background: rgba(0,240,255,0.1);
+  border: 1px solid rgba(0,240,255,0.25);
+  padding: 2px 6px;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+}
+.card-badge {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--muted); background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); padding: 2px 8px; letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
-  .field { display: flex; flex-direction: column; gap: 6px; }
+/* ═══════════════════════════════════════════════════════════
+   07. PLATFORM SETUP BOXES
+═══════════════════════════════════════════════════════════ */
+.platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 740px) { .platform-grid { grid-template-columns: 1fr; } }
 
-  label {
-    font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--muted);
-    font-family: 'Rajdhani', sans-serif;
-  }
+.platform-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.platform-box.twitch  { border-left: 3px solid #9147ff; }
+.platform-box.youtube { border-left: 3px solid #ff0000; }
+.platform-box.kick    { border-left: 3px solid #53b94f; }
 
-  input, select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-  input::placeholder { color: var(--muted); opacity: 0.6; }
-  input:focus, select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
-  }
-  select { cursor: pointer; }
-  select option { background: #1a1a2e; }
+.pbox-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+}
+.pbox-head svg { width: 16px; height: 16px; flex-shrink: 0; }
+.pbox-status {
+  font-family: 'Space Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em;
+  color: var(--muted); text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+}
+.pbox-status .pstat-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
+.pbox-status.has-value .pstat-dot { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.pbox-status.has-value { color: #4ade80; }
 
-  /* ── THEME SWATCHES ──────────────────────────── */
-  .theme-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-  }
-  @media (max-width: 500px) { .theme-grid { grid-template-columns: 1fr 1fr; } }
+/* ═══════════════════════════════════════════════════════════
+   08. FORM INPUTS & TOGGLES
+═══════════════════════════════════════════════════════════ */
+.field-group { display: grid; gap: 12px; }
+.field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 740px) { .field-row, .field-row-3 { grid-template-columns: 1fr; } }
 
-  .theme-swatch {
-    border: 2px solid var(--border);
-    border-radius: 10px; padding: 10px 8px;
-    cursor: pointer; transition: all 0.2s;
-    text-align: center; position: relative;
-    background: var(--surface2);
-    user-select: none;
-  }
-  .theme-swatch:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
-  .theme-swatch.selected { border-color: var(--accent); box-shadow: 0 0 16px rgba(168,85,247,0.3); }
-  .theme-swatch input { display: none; }
-  .swatch-colors { display: flex; gap: 3px; justify-content: center; margin-bottom: 6px; }
-  .swatch-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .swatch-name { font-size: 11px; font-weight: 700; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em; color: var(--muted); }
-  .theme-swatch.selected .swatch-name { color: var(--accent); }
+.field { display: flex; flex-direction: column; gap: 6px; }
 
-  .theme-swatch.cyber .swatch-name { color: #7cfc98; }
-  .theme-swatch.sunset .swatch-name { color: #ffb86b; }
-  .theme-swatch.mono .swatch-name { color: #f8fafc; }
+label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); font-family: 'Space Mono', monospace;
+  display: flex; justify-content: space-between; align-items: center;
+}
+label .val-badge {
+  color: var(--accent); background: rgba(0,240,255,0.08);
+  border: 1px solid rgba(0,240,255,0.2); padding: 1px 6px;
+  font-size: 9px; letter-spacing: 0.05em;
+}
 
-  /* ── RANGE ───────────────────────────────────── */
-  .range-wrap { display: flex; align-items: center; gap: 12px; }
-  input[type=range] {
-    flex: 1; appearance: none; -webkit-appearance: none; height: 4px; padding: 0;
-    background: var(--surface2); border-color: transparent;
-    border-radius: 4px; cursor: pointer;
-    background: linear-gradient(90deg, var(--accent) var(--pct, 50%), var(--surface2) var(--pct, 50%));
-    box-shadow: none;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 0 8px var(--glow); cursor: pointer;
-    border: 2px solid #fff;
-  }
-  .range-val {
-    font-family: 'Space Mono', monospace; font-size: 12px;
-    color: var(--accent); min-width: 30px; text-align: center;
-    background: var(--surface2); border-radius: 6px; padding: 3px 8px;
-    border: 1px solid var(--border);
-  }
+input[type=text], select, textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  padding: 9px 12px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+input[type=text]:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,240,255,0.15), 0 0 12px rgba(0,240,255,0.1);
+  background: rgba(11,19,34,0.9);
+}
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.6; }
+select { cursor: pointer; }
+select option { background: #0b1322; color: #f1f5f9; }
+textarea { resize: vertical; min-height: 56px; font-family: 'Space Mono', monospace; font-size: 11px; }
 
-  /* ── TOGGLE ─────────────────────────────────── */
-  .toggle-field { display: flex; align-items: center; justify-content: space-between; }
-  .toggle-label { font-size: 13px; font-weight: 600; color: var(--text); }
-  .toggle-desc  { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .toggle {
-    position: relative; width: 40px; height: 22px;
-    flex-shrink: 0; cursor: pointer;
-  }
-  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .toggle-track {
-    position: absolute; inset: 0; border-radius: 11px;
-    background: var(--surface2); border: 1px solid var(--border);
-    transition: all 0.2s;
-  }
-  .toggle input:checked ~ .toggle-track { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--glow); }
-  .toggle-thumb {
-    position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
-    border-radius: 50%; background: #fff; transition: transform 0.2s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  }
-  .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+.color-field { display: flex; gap: 8px; align-items: stretch; }
+.color-field input[type=color] {
+  width: 40px; height: auto; flex-shrink: 0; padding: 4px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface2);
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  outline: none;
+}
+.color-field input[type=text] { flex: 1; }
 
-  .source-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-  @media (max-width: 680px) { .source-grid { grid-template-columns: 1fr; } }
-  .source-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)), var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
-  }
-  .source-card h3 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    margin-bottom: 6px;
-    letter-spacing: 0.03em;
-  }
-  .source-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .source-link {
-    display: inline-flex;
-    margin-top: 10px;
-    padding: 8px 12px;
-    border-radius: 9px;
-    background: rgba(255,255,255,0.06);
-    color: var(--accent2);
-    text-decoration: none;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-  .source-link:hover { background: rgba(255,255,255,0.1); }
+.hint { font-size: 10px; color: var(--muted); line-height: 1.5; margin-top: 1px; }
+.hint code { background: rgba(255,255,255,0.07); padding: 1px 4px; font-family: 'Space Mono', monospace; color: var(--accent); font-size: 9px; }
 
-  /* ── OUTPUT ─────────────────────────────────── */
-  #output-card {
-    background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,182,212,0.07));
-    border: 1px solid rgba(168,85,247,0.25);
-  }
-  .url-box {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-    font-family: 'Space Mono', monospace; font-size: 12px;
-    color: var(--accent2); word-break: break-all; line-height: 1.6;
-    margin-bottom: 12px; min-height: 60px;
-    transition: all 0.2s;
-  }
-  .url-box:empty::before { content: 'Fill in at least one platform above…'; color: var(--muted); font-style: italic; }
+/* Range Sliders */
+.range-wrap { display: flex; align-items: center; gap: 10px; }
+input[type=range] {
+  flex: 1; appearance: none; -webkit-appearance: none; height: 4px; padding: 0;
+  border: none; border-radius: 2px; cursor: pointer; outline: none;
+  background: linear-gradient(90deg, var(--accent) var(--pct, 50%), rgba(255,255,255,0.08) var(--pct, 50%));
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  background: var(--accent);
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+  box-shadow: 0 0 10px var(--glow); cursor: pointer;
+}
+.range-val {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--accent); min-width: 42px; text-align: center;
+  background: rgba(0,240,255,0.06); padding: 3px 6px;
+  border: 1px solid rgba(0,240,255,0.18);
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+}
 
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Toggle Switches */
+.toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 740px) { .toggle-row { grid-template-columns: 1fr; } }
+.toggle-field {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 10px 12px;
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  gap: 10px; cursor: pointer;
+}
+.toggle-info .toggle-label {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  font-family: 'Rajdhani', sans-serif; letter-spacing: 0.04em; display: block;
+}
+.toggle-info .toggle-desc { font-size: 10px; color: var(--muted); margin-top: 2px; display: block; }
+.toggle { position: relative; width: 40px; height: 20px; flex-shrink: 0; cursor: pointer; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  position: absolute; inset: 0;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  background: var(--surface3); border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.toggle input:checked ~ .toggle-track {
+  background: var(--accent); border-color: var(--accent);
+  box-shadow: 0 0 10px var(--glow);
+}
+.toggle-thumb {
+  position: absolute; top: 3px; left: 3px; width: 14px; height: 14px;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+  background: #94a3b8; transition: transform 0.2s, background 0.2s;
+}
+.toggle input:checked ~ .toggle-thumb { transform: translateX(20px); background: #000; }
 
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 10px 18px; border-radius: 10px; border: none;
-    font-family: 'Rajdhani', sans-serif; font-weight: 700;
-    font-size: 14px; letter-spacing: 0.05em; text-transform: uppercase;
-    cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    text-decoration: none;
-  }
-  .btn-primary {
-    background: var(--accent); color: #fff;
-    box-shadow: 0 4px 20px rgba(168,85,247,0.4);
-  }
-  .btn-primary:hover { background: #9333ea; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(168,85,247,0.5); }
-  .btn-secondary {
-    background: var(--surface2); color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-ghost {
-    background: transparent; color: var(--muted);
-    border: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+/* ═══════════════════════════════════════════════════════════
+   09. 10 PRO GAMER THEME CARDS
+═══════════════════════════════════════════════════════════ */
+.theme-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+@media (max-width: 740px) { .theme-grid { grid-template-columns: repeat(2, 1fr); } }
 
-  /* ── INSTRUCTIONS ───────────────────────────── */
-  .steps {
-    counter-reset: step;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .step {
-    display: flex; align-items: flex-start; gap: 12px;
-    background: var(--surface2); border-radius: 10px; padding: 12px 14px;
-    border: 1px solid var(--border);
-  }
-  .step-num {
-    counter-increment: step;
-    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
-    background: var(--accent); color: #fff;
-    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .step-text { font-size: 13px; line-height: 1.5; padding-top: 2px; }
-  .step-text strong { color: var(--accent2); }
+.theme-card {
+  position: relative; cursor: pointer; user-select: none;
+  background: var(--surface2); border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  padding: 10px 8px; text-align: center;
+  transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.theme-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.25); }
+.theme-card.selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 16px var(--glow-soft), 0 0 0 1px var(--accent);
+  background: rgba(0, 240, 255, 0.08);
+}
+.theme-card.selected::after {
+  content: '✓'; position: absolute; top: 4px; right: 6px;
+  font-size: 10px; font-weight: 700; color: var(--accent);
+  font-family: 'Space Mono', monospace;
+}
+.theme-preview-box {
+  width: 100%; height: 28px; border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.theme-label { font-family: 'Rajdhani', sans-serif; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 
-  /* ── HOSTING INFO ───────────────────────────── */
-  .host-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 500px) { .host-grid { grid-template-columns: 1fr; } }
+/* ═══════════════════════════════════════════════════════════
+   10. CHIPS & BUTTONS
+═══════════════════════════════════════════════════════════ */
+.anim-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+@media (max-width: 740px) { .anim-grid { grid-template-columns: repeat(3, 1fr); } }
+.anim-chip {
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface2);
+  padding: 8px 6px; text-align: center;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  transition: all 0.15s; user-select: none;
+}
+.anim-chip:hover { border-color: rgba(255,255,255,0.25); }
+.anim-chip.selected { border-color: var(--accent); background: rgba(0,240,255,0.09); }
+.anim-chip-name { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-dim); text-transform: uppercase; }
+.anim-chip.selected .anim-chip-name { color: var(--accent); }
 
-  .host-card {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px; transition: all 0.2s;
-  }
-  .host-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-1px); }
-  .host-name {
-    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 16px;
-    letter-spacing: 0.04em; margin-bottom: 4px;
-  }
-  .host-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .host-badge {
-    display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
-    padding: 2px 7px; border-radius: 10px; text-transform: uppercase; margin-top: 6px;
-  }
-  .hb-free { background: rgba(52,211,153,0.2); color: #34d399; }
-  .hb-best { background: rgba(168,85,247,0.2); color: #a855f7; }
+.pos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.pos-chip {
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface2);
+  padding: 9px 10px; display: flex; align-items: center; gap: 8px;
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  transition: all 0.15s; user-select: none;
+}
+.pos-chip:hover { border-color: rgba(255,255,255,0.2); }
+.pos-chip.selected { border-color: var(--accent); background: rgba(0,240,255,0.09); }
+.pos-chip-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+.pos-chip.selected .pos-chip-label { color: var(--accent); }
 
-  /* ── TOAST ───────────────────────────────────── */
-  #toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-    background: #22c55e; color: #fff;
-    font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px;
-    letter-spacing: 0.05em; padding: 10px 20px; border-radius: 10px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 999; white-space: nowrap;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  border: none; font-family: 'Rajdhani', sans-serif; font-weight: 700;
+  font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.2s;
+  white-space: nowrap; text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #000; box-shadow: 0 4px 20px rgba(0,240,255,0.35); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,240,255,0.5); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
 
-  /* ── MISC ────────────────────────────────────── */
-  .divider { height: 1px; background: var(--border); margin: 8px 0; }
-  .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .twitch-color { color: #bf94ff; }
-  .yt-color { color: #f87171; }
-  .kick-color { color: #4ade80; }
+.test-btn {
+  padding: 6px 12px; background: var(--surface2); border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  color: var(--text-dim); font-family: 'Space Mono', monospace;
+  font-weight: 700; font-size: 10px; letter-spacing: 0.06em;
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+}
+.test-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
 
-  @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  .card { animation: fadeInUp 0.4s ease both; }
-  .card:nth-child(2) { animation-delay: 0.05s; }
-  .card:nth-child(3) { animation-delay: 0.10s; }
-  .card:nth-child(4) { animation-delay: 0.15s; }
-  .card:nth-child(5) { animation-delay: 0.20s; }
-  .card:nth-child(6) { animation-delay: 0.25s; }
+/* ═══════════════════════════════════════════════════════════
+   11. TERMINAL URL & PRESETS
+═══════════════════════════════════════════════════════════ */
+.terminal-box {
+  background: #020612; border: 1px solid rgba(0,240,255,0.2);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  padding: 12px 14px;
+  font-family: 'Space Mono', monospace; font-size: 11.5px; color: #38bdf8;
+  word-break: break-all; margin-bottom: 12px; min-height: 48px;
+  display: flex; align-items: center; gap: 8px;
+}
+.terminal-url { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-tag {
+  font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700;
+  background: rgba(0,240,255,0.12); color: var(--accent);
+  border: 1px solid rgba(0,240,255,0.3); padding: 4px 10px;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+  cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+}
+.copy-tag:hover { background: var(--accent); color: #000; }
+
+.preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.preset-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 5px 10px; font-family: 'Space Mono', monospace; font-size: 9.5px;
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  cursor: pointer; transition: all 0.15s; color: var(--text-dim);
+}
+.preset-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════════
+   12. STICKY LIVE PREVIEW PANEL
+═══════════════════════════════════════════════════════════ */
+.preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.preview-title {
+  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.preview-title .p-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: blink 1.8s infinite; }
+.preview-actions { display: flex; gap: 6px; }
+
+.preview-frame-wrap {
+  flex: 1; position: relative; overflow: hidden;
+  background: #020612;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.preview-iframe { width: 100%; height: 100%; border: none; background: transparent; }
+
+.preview-footer {
+  padding: 10px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.preview-size-btns { display: flex; gap: 4px; align-items: center; margin-bottom: 8px; }
+.size-btn {
+  font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700;
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 3px 8px; color: var(--muted); cursor: pointer; transition: all 0.15s;
+  text-transform: uppercase;
+}
+.size-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,240,255,0.08); }
+
+.test-deck-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.test-deck-mini button {
+  padding: 6px 8px; background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-dim); font-family: 'Space Mono', monospace; font-size: 9.5px;
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase; white-space: nowrap;
+}
+.test-deck-mini button:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════════
+   13. STEPS & HOSTING CARDS
+═══════════════════════════════════════════════════════════ */
+.steps { counter-reset: step; display: flex; flex-direction: column; gap: 6px; }
+.step {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface2); padding: 10px 14px;
+  border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+}
+.step-num {
+  width: 22px; height: 22px; flex-shrink: 0;
+  background: var(--accent); color: #000;
+  font-family: 'Space Mono', monospace; font-weight: 700; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  clip-path: polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px));
+}
+.step-text { font-size: 13px; line-height: 1.5; padding-top: 2px; }
+.step-text strong { color: var(--accent); }
+.step-text code {
+  background: rgba(255,255,255,0.07); padding: 1px 5px; border-radius: 2px;
+  font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent2);
+}
+
+.host-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 740px) { .host-grid { grid-template-columns: repeat(2, 1fr); } }
+.host-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  padding: 12px; transition: all 0.2s;
+}
+.host-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+.host-name { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+.host-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ═══════════════════════════════════════════════════════════
+   14. TOAST NOTIFICATION & PRESETS
+═══════════════════════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--accent); color: #000;
+  font-family: 'Space Mono', monospace; font-weight: 700; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 22px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 20px rgba(0,240,255,0.4);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 9999;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.success { background: #22c55e; box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 20px rgba(34,197,94,0.4); }
+
+.preset-css-pill {
+  display: inline-block; padding: 2px 8px; margin: 2px;
+  background: var(--surface3); border: 1px solid var(--border);
+  font-family: 'Space Mono', monospace; font-size: 9px; color: var(--accent);
+  cursor: pointer; transition: all 0.15s;
+}
+.preset-css-pill:hover { border-color: var(--accent); }
 </style>
 </head>
 <body>
+
 <div class="bg-grid"></div>
 <div class="bg-orb1"></div>
 <div class="bg-orb2"></div>
+<div class="scan-line"></div>
 
-<div class="page">
+<!-- TOP NAV -->
+<nav class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-dot"></div>
+    <span>StreamChat Overlay</span>
+    <span class="brand-ver">v3.5 · PRO GAMER HUD</span>
+  </div>
+  <div class="topbar-nav">
+    <a href="#sec-source">[01] Sources</a>
+    <a href="#sec-theme">[02] Theme</a>
+    <a href="#sec-type">[03] Typography</a>
+    <a href="#sec-anim">[04] Motion</a>
+    <a href="#sec-audio">[05] Audio FX</a>
+    <a href="#sec-filters">[06] Accents</a>
+    <a href="#sec-output">[07] Output</a>
+    <a href="#sec-obs">[08] OBS Setup</a>
+    <a href="#sec-host">[09] Hosting</a>
+  </div>
+</nav>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo"><div class="logo-dot"></div> Stream Overlay Setup</div>
-    <h1>StreamChat Overlay</h1>
-    <p class="tagline">Animated • Multi-Platform • Free • No Login Required</p>
-  </header>
+<div class="layout">
 
-  <!-- PLATFORMS -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🎙️</span> Platform Setup</div>
+  <!-- ══════════════════════════════════════════════════════
+       LEFT: CONFIG COMMAND DECK
+  ══════════════════════════════════════════════════════════ -->
+  <div class="config-col">
 
-    <div class="multi-note">
-      Fill in any combination of Twitch, YouTube, and Kick. The generated browser source URL can combine multiple live chats in one overlay, with avatars, badges, and event cards when the platform exposes that data.
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="sys-badge"><div class="sys-dot"></div> PRO GAMER HUD ENGINE · ONLINE</div>
+      <div class="logo-container">
+        <div class="logo-text">StreamChat<br>Overlay</div>
+      </div>
+      <div class="logo-sub">TWITCH · YOUTUBE · KICK · ZERO DEPENDENCIES</div>
+      <div class="tagline">
+        <span class="tag">🎮 10 HUD Themes</span>
+        <span class="tag">⚡ 7TV / BTTV Emotes</span>
+        <span class="tag">🔊 FM Synth Audio</span>
+        <span class="tag">💎 Multi-Tier Alerts</span>
+      </div>
     </div>
 
-    <div class="platform-tabs">
-      <div class="ptab twitch active" onclick="switchTab('twitch')">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="#9147ff"><path d="M2 1L1 4v10h4v2h2l2-2h3l4-4V1H2zm12 9l-2 2H8l-2 2V12H3V2h11v8zm-2-5H10v4h2V5zm-4 0H6v4h2V5z"/></svg>
-        Twitch
+    <!-- [01] PLATFORM SOURCES -->
+    <div class="card" id="sec-source">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[01]</span> Live Sources — Connect Platforms</div>
+        <span class="card-badge">Multi-Platform</span>
       </div>
-      <div class="ptab youtube" onclick="switchTab('youtube')">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="#ff0000"><path d="M14.5 4.5s-.2-1.2-.7-1.7c-.7-.7-1.4-.7-1.8-.8C10.5 2 8 2 8 2s-2.5 0-4 .1c-.4 0-1.1.1-1.8.8-.5.5-.7 1.7-.7 1.7S1.3 5.9 1.3 7.2v1.2c0 1.3.2 2.7.2 2.7s.2 1.2.7 1.7c.7.7 1.6.6 2 .7 1.5.1 6 .2 6 .2s2.5 0 4-.2c.4-.1 1.1-.2 1.8-.8.5-.5.7-1.7.7-1.7s.2-1.3.2-2.7V7.2c0-1.3-.2-2.7-.2-2.7zM6.5 9.5v-4l4.5 2-4.5 2z"/></svg>
-        YouTube
+
+      <div class="platform-grid">
+        <!-- TWITCH -->
+        <div class="platform-box twitch">
+          <div class="pbox-head" style="color:#c084fc;">
+            <span>Twitch</span>
+            <svg viewBox="0 0 16 16" fill="#9147ff"><path d="M2 1L1 4v10h4v2h2l2-2h3l4-4V1H2zm12 9l-2 2H8l-2 2V12H3V2h11v8zm-2-5H10v4h2V5zm-4 0H6v4h2V5z"/></svg>
+          </div>
+          <div class="field">
+            <label>Channel Username</label>
+            <input type="text" id="twitch" placeholder="e.g. shroud, tarik…" oninput="onFieldChange(); updatePlatformStatus('twitch', this.value)">
+          </div>
+          <div class="pbox-status" id="twitch-status"><div class="pstat-dot"></div><span>Anonymous IRC · No API key</span></div>
+        </div>
+
+        <!-- YOUTUBE -->
+        <div class="platform-box youtube">
+          <div class="pbox-head" style="color:#f87171;">
+            <span>YouTube</span>
+            <svg viewBox="0 0 16 16" fill="#ff0000"><path d="M14.5 4.5s-.2-1.2-.7-1.7c-.7-.7-1.4-.7-1.8-.8C10.5 2 8 2 8 2s-2.5 0-4 .1c-.4 0-1.1.1-1.8.8-.5.5-.7 1.7-.7 1.7S1.3 5.9 1.3 7.2v1.2c0 1.3.2 2.7.2 2.7s.2 1.2.7 1.7c.7.7 1.6.6 2 .7 1.5.1 6 .2 6 .2s2.5 0 4-.2c.4-.1 1.1-.2 1.8-.8.5-.5.7-1.7.7-1.7s.2-1.3.2-2.7V7.2c0-1.3-.2-2.7-.2-2.7zM6.5 9.5v-4l4.5 2-4.5 2z"/></svg>
+          </div>
+          <div class="field">
+            <label>API v3 Key</label>
+            <input type="text" id="yt_key" placeholder="AIzaSy…" oninput="onFieldChange(); updatePlatformStatus('youtube', this.value)">
+          </div>
+          <div class="field">
+            <label>Live Video ID</label>
+            <input type="text" id="yt_vid" placeholder="e.g. dQw4w9WgXcQ" oninput="onFieldChange()">
+          </div>
+        </div>
+
+        <!-- KICK -->
+        <div class="platform-box kick">
+          <div class="pbox-head" style="color:#4ade80;">
+            <span>Kick</span>
+            <svg viewBox="0 0 16 16" fill="#53b94f"><rect x="2" y="2" width="12" height="12" rx="2"/><text x="8" y="11" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold" font-family="sans-serif">K</text></svg>
+          </div>
+          <div class="field">
+            <label>Channel Username</label>
+            <input type="text" id="kick" placeholder="e.g. xqc, trainwreck…" oninput="onFieldChange(); updatePlatformStatus('kick', this.value)">
+          </div>
+          <div class="field">
+            <label>Chatroom ID <span style="color:var(--accent);font-weight:400;">(Numeric ID)</span></label>
+            <input type="text" id="kick_id" placeholder="e.g. 123456" oninput="onFieldChange()">
+          </div>
+          <div class="hint">⚡ Enter your numeric chatroom ID for 100% guaranteed Pusher connection.</div>
+        </div>
       </div>
-      <div class="ptab kick" onclick="switchTab('kick')">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="#53b94f"><rect x="2" y="2" width="12" height="12" rx="3"/><text x="8" y="11" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">K</text></svg>
-        Kick
+
+      <div class="field" style="margin-top:12px;">
+        <label>Streamer Brand / Fallback Avatar URL <span style="color:rgba(255,255,255,0.3);font-weight:400;">(Optional)</span></label>
+        <input type="text" id="avatar" placeholder="https://…/your-streamer-logo.png" oninput="onFieldChange()">
+        <div class="hint">Custom logo shown when a user or platform does not supply a profile avatar.</div>
       </div>
     </div>
 
-    <!-- TWITCH -->
-    <div class="platform-section active" id="section-twitch">
-      <div class="field">
-        <label>Twitch Channel Username</label>
-        <input type="text" id="twitch" placeholder="e.g. ninja, shroud, xqc…" oninput="buildUrl()">
-        <div class="hint">✅ No API key needed — connects anonymously via Twitch IRC</div>
+    <!-- [02] 10 PRO GAMER HUD THEMES -->
+    <div class="card" id="sec-theme">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[02]</span> HUD Theme — 10 Pro Gamer Styles</div>
+      </div>
+
+      <div class="theme-grid">
+        <div class="theme-card selected" data-val="neon" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#060816;color:#00f0ff;border-left:3px solid #00f0ff;box-shadow:0 0 8px rgba(0,240,255,0.4);">NEON</div>
+          <span class="theme-label">Cyberpunk</span>
+        </div>
+        <div class="theme-card" data-val="valorant" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#0f1923;color:#ff4655;border-left:3px solid #ff4655;">TACTICAL</div>
+          <span class="theme-label">Valorant</span>
+        </div>
+        <div class="theme-card" data-val="stealth" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#090a0e;color:#fff;border-left:3px solid #fff;">STEALTH</div>
+          <span class="theme-label">OLED FPS</span>
+        </div>
+        <div class="theme-card" data-val="fire" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#160604;color:#ffaa00;border-left:3px solid #ff3700;">MAGMA</div>
+          <span class="theme-label">Apex Flame</span>
+        </div>
+        <div class="theme-card" data-val="cyber" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#020e08;color:#00ff66;border-left:3px dashed #00ff66;">TERMINAL</div>
+          <span class="theme-label">Matrix Net</span>
+        </div>
+        <div class="theme-card" data-val="synthwave" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:linear-gradient(135deg,#200816,#0b1322);color:#fbbf24;border-left:3px solid #f43f5e;">SYNTH</div>
+          <span class="theme-label">80s Outrun</span>
+        </div>
+        <div class="theme-card" data-val="glass" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;">GLASS</div>
+          <span class="theme-label">Frosted</span>
+        </div>
+        <div class="theme-card" data-val="rose" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#1c0a14;color:#fb7185;border-left:3px solid #fb7185;border-radius:8px;">SAKURA</div>
+          <span class="theme-label">Kawaii Anime</span>
+        </div>
+        <div class="theme-card" data-val="ocean" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:#04101e;color:#38bdf8;border-left:3px solid #0ea5e9;">HEXTECH</div>
+          <span class="theme-label">Arcane Blue</span>
+        </div>
+        <div class="theme-card" data-val="floating" onclick="selectTheme(this)">
+          <div class="theme-preview-box" style="background:transparent;color:#fff;border-left:3px solid #00f0ff;text-shadow:-1px -1px 0 #000,1px 1px 0 #000;">FLOAT</div>
+          <span class="theme-label">Pure Outline</span>
+        </div>
       </div>
     </div>
 
-    <!-- YOUTUBE -->
-    <div class="platform-section" id="section-youtube">
+    <!-- [03] TYPOGRAPHY & READABILITY -->
+    <div class="card" id="sec-type">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[03]</span> Typography &amp; Readability</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-row">
+          <div class="field">
+            <label>Font Family</label>
+            <select id="font" onchange="onFieldChange()">
+              <option value="">Theme Default</option>
+              <option value="rajdhani">Rajdhani — Tactical Sci-Fi</option>
+              <option value="chakra">Chakra Petch — Cyber Mecha</option>
+              <option value="orbitron">Orbitron — Heavy Gamer</option>
+              <option value="space-mono">Space Mono — Terminal Code</option>
+              <option value="inter">Inter — Clean Modern</option>
+              <option value="press-start">Press Start 2P — 8-Bit</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Card Opacity <span class="val-badge" id="opacity-badge">90%</span></label>
+            <div class="range-wrap">
+              <input type="range" id="opacity" min="0" max="100" value="90" oninput="rangeUpdate(this,'opacity-badge','%'); onFieldChange()">
+              <div class="range-val" id="opacity-val">90%</div>
+            </div>
+            <div class="hint">Set to <code>0%</code> for pure transparent floating text mode.</div>
+          </div>
+        </div>
+
+        <div class="field-row-3">
+          <div class="field">
+            <label>Font Size <span class="val-badge" id="size-badge">14px</span></label>
+            <div class="range-wrap">
+              <input type="range" id="size" min="11" max="24" value="14" oninput="rangeUpdate(this,'size-badge','px'); onFieldChange()">
+              <div class="range-val" id="size-val">14px</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Emote Scale <span class="val-badge" id="emote-badge">26px</span></label>
+            <div class="range-wrap">
+              <input type="range" id="emote_size" min="20" max="42" value="26" oninput="rangeUpdate(this,'emote-badge','px'); onFieldChange()">
+              <div class="range-val" id="emote-val">26px</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Message Lifetime <span class="val-badge" id="dur-badge">25s</span></label>
+            <div class="range-wrap">
+              <input type="range" id="dur" min="0" max="120" value="25" oninput="rangeUpdateDur(this); onFieldChange()">
+              <div class="range-val" id="dur-val">25s</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <label class="toggle-field">
+            <div class="toggle-info">
+              <span class="toggle-label">Text Stroke / Contour</span>
+              <span class="toggle-desc">High-contrast black outline over bright gameplay</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="stroke" onchange="onFieldChange()">
+              <div class="toggle-track"></div><div class="toggle-thumb"></div>
+            </label>
+          </label>
+          <label class="toggle-field">
+            <div class="toggle-info">
+              <span class="toggle-label">Show Avatars</span>
+              <span class="toggle-desc">Platform and streamer user avatars</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="avatars" checked onchange="onFieldChange()">
+              <div class="toggle-track"></div><div class="toggle-thumb"></div>
+            </label>
+          </label>
+          <label class="toggle-field">
+            <div class="toggle-info">
+              <span class="toggle-label">Show Timestamps</span>
+              <span class="toggle-desc">Display [HH:MM] on chat cards</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="time" onchange="onFieldChange()">
+              <div class="toggle-track"></div><div class="toggle-thumb"></div>
+            </label>
+          </label>
+          <label class="toggle-field">
+            <div class="toggle-info">
+              <span class="toggle-label">Show Badges</span>
+              <span class="toggle-desc">Sub, Mod, VIP, Broadcaster badges</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="badges" checked onchange="onFieldChange()">
+              <div class="toggle-track"></div><div class="toggle-thumb"></div>
+            </label>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- [04] ANIMATIONS & DOCKING -->
+    <div class="card" id="sec-anim">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[04]</span> Animations, Dock &amp; Flow</div>
+      </div>
+
       <div class="field-group">
         <div class="field">
-          <label>YouTube Data API v3 Key</label>
-          <input type="text" id="yt_key" placeholder="AIzaSy…" oninput="buildUrl()">
-          <div class="hint">Get free at <strong>console.cloud.google.com</strong> → APIs & Services → YouTube Data API v3</div>
+          <label>Entry Animation</label>
+          <div class="anim-grid" id="anim-grid">
+            <div class="anim-chip selected" data-val="glitch" onclick="selectAnim(this)">
+              <span class="anim-chip-name">⚡ Glitch</span>
+            </div>
+            <div class="anim-chip" data-val="slide" onclick="selectAnim(this)">
+              <span class="anim-chip-name">↗ Slide</span>
+            </div>
+            <div class="anim-chip" data-val="pop" onclick="selectAnim(this)">
+              <span class="anim-chip-name">💥 Pop</span>
+            </div>
+            <div class="anim-chip" data-val="fade" onclick="selectAnim(this)">
+              <span class="anim-chip-name">✨ Fade</span>
+            </div>
+            <div class="anim-chip" data-val="float" onclick="selectAnim(this)">
+              <span class="anim-chip-name">⬆ Float</span>
+            </div>
+            <div class="anim-chip" data-val="zoom" onclick="selectAnim(this)">
+              <span class="anim-chip-name">🔍 Zoom</span>
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>Live Video ID</label>
-          <input type="text" id="yt_vid" placeholder="dQw4w9WgXcQ (from URL)" oninput="buildUrl()">
-          <div class="hint">Copy the ID after <code>?v=</code> in your YouTube live URL</div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Dock Position</label>
+            <div class="pos-grid" id="pos-grid">
+              <div class="pos-chip selected" data-val="right" onclick="selectPos(this)">
+                <span class="pos-chip-label">↘ Bottom Right</span>
+              </div>
+              <div class="pos-chip" data-val="left" onclick="selectPos(this)">
+                <span class="pos-chip-label">↙ Bottom Left</span>
+              </div>
+              <div class="pos-chip" data-val="top-right" onclick="selectPos(this)">
+                <span class="pos-chip-label">↗ Top Right</span>
+              </div>
+              <div class="pos-chip" data-val="top-left" onclick="selectPos(this)">
+                <span class="pos-chip-label">↖ Top Left</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group" style="gap:10px;">
+            <div class="field">
+              <label>Chat Flow Direction</label>
+              <select id="dir" onchange="onFieldChange()">
+                <option value="up">⬆ Bottom-Up (Standard Stream Chat)</option>
+                <option value="down">⬇ Top-Down (Waterfall)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Max Messages <span class="val-badge" id="max-badge">20</span></label>
+              <div class="range-wrap">
+                <input type="range" id="max" min="5" max="50" value="20" oninput="rangeUpdate(this,'max-badge',''); onFieldChange()">
+                <div class="range-val" id="max-val">20</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- KICK -->
-    <div class="platform-section" id="section-kick">
-      <div class="field">
-        <label>Kick Channel Username</label>
-        <input type="text" id="kick" placeholder="e.g. trainwreck, xqc…" oninput="buildUrl()">
-        <div class="hint">✅ No API key needed — connects via Kick's public WebSocket</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BRAND / FALLBACK AVATAR -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🖼️</span> Brand / Fallback Avatar</div>
-    <div class="field-group">
-      <div class="field">
-        <label>Avatar or Logo Image URL (optional)</label>
-        <input type="text" id="avatar" placeholder="https://…/your-logo.png" oninput="buildUrl()">
-        <div class="hint">Used when a platform does not provide profile images, and as a fallback badge/logo for event cards.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AUDIO / SOURCE OPTIONS -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🔊</span> Audio & Extra Sources</div>
-    <div class="field-group">
-      <div class="toggle-field">
-        <div>
-          <div class="toggle-label">Enable Sound Effects</div>
-          <div class="toggle-desc">Plays arcade-style cues for chat, alerts, and platform events</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="sound" checked onchange="buildUrl()">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
-      </div>
-      <div class="field">
-        <label>Sound Volume — <span id="volume-heading">45</span>%</label>
-        <div class="range-wrap">
-          <input type="range" id="volume" min="0" max="100" value="45" oninput="rangeUpdate(this,'volume-heading','%'); rangeUpdate(this,'volume-value','%'); buildUrl()">
-          <div class="range-val" id="volume-value">45</div>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:12px;line-height:1.6">
-        Use the chat URL for message overlays. If you want a separate browser source for YouTube live channel stats, open the stats source button below after adding your YouTube API key and live video ID.
-      </p>
-    </div>
-  </div>
-
-  <!-- APPEARANCE -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🎨</span> Appearance</div>
-
-    <div class="field-group">
-      <div class="field">
-        <label>Theme</label>
-        <div class="theme-grid" id="theme-grid">
-          <label class="theme-swatch selected" data-val="neon" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#f0abfc"></div>
-              <div class="swatch-dot" style="background:#67e8f9"></div>
-              <div class="swatch-dot" style="background:#0a0a14"></div>
-            </div>
-            <div class="swatch-name">Neon</div>
-          </label>
-          <label class="theme-swatch" data-val="fire" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#fb923c"></div>
-              <div class="swatch-dot" style="background:#fbbf24"></div>
-              <div class="swatch-dot" style="background:#0f0500"></div>
-            </div>
-            <div class="swatch-name">Fire</div>
-          </label>
-          <label class="theme-swatch" data-val="ocean" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#34d399"></div>
-              <div class="swatch-dot" style="background:#38bdf8"></div>
-              <div class="swatch-dot" style="background:#000a14"></div>
-            </div>
-            <div class="swatch-name">Ocean</div>
-          </label>
-          <label class="theme-swatch" data-val="rose" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#f472b6"></div>
-              <div class="swatch-dot" style="background:#fb7185"></div>
-              <div class="swatch-dot" style="background:#0f000a"></div>
-            </div>
-            <div class="swatch-name">Rose</div>
-          </label>
-          <label class="theme-swatch" data-val="glass" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#c7d2fe"></div>
-              <div class="swatch-dot" style="background:#a5f3fc"></div>
-              <div class="swatch-dot" style="background:rgba(255,255,255,0.1)"></div>
-            </div>
-            <div class="swatch-name">Glass</div>
-          </label>
-          <label class="theme-swatch" data-val="minimal" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#f8fafc"></div>
-              <div class="swatch-dot" style="background:#94a3b8"></div>
-              <div class="swatch-dot" style="background:#0f1729"></div>
-            </div>
-            <div class="swatch-name">Minimal</div>
-          </label>
-          <label class="theme-swatch cyber" data-val="cyber" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#7cfc98"></div>
-              <div class="swatch-dot" style="background:#22d3ee"></div>
-              <div class="swatch-dot" style="background:#050816"></div>
-            </div>
-            <div class="swatch-name">Cyber</div>
-          </label>
-          <label class="theme-swatch sunset" data-val="sunset" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#fb7185"></div>
-              <div class="swatch-dot" style="background:#fbbf24"></div>
-              <div class="swatch-dot" style="background:#140b07"></div>
-            </div>
-            <div class="swatch-name">Sunset</div>
-          </label>
-          <label class="theme-swatch mono" data-val="mono" onclick="selectTheme(this)">
-            <div class="swatch-colors">
-              <div class="swatch-dot" style="background:#f8fafc"></div>
-              <div class="swatch-dot" style="background:#94a3b8"></div>
-              <div class="swatch-dot" style="background:#020617"></div>
-            </div>
-            <div class="swatch-name">Mono</div>
-          </label>
-        </div>
+    <!-- [05] AUDIO FX -->
+    <div class="card" id="sec-audio">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[05]</span> Procedural Web Audio Synthesizer</div>
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label>Animation Style</label>
-          <select id="anim" onchange="buildUrl()">
-            <option value="slide">Slide In ↗</option>
-            <option value="pop">Pop 💥</option>
-            <option value="fade">Fade ✨</option>
-            <option value="float">Float ⬆</option>
-            <option value="zoom">Zoom ⚡</option>
-          </select>
+      <div class="field-group">
+        <div class="field-row-3">
+          <div class="field">
+            <label>Sound Profile</label>
+            <select id="sound_profile" onchange="onFieldChange()">
+              <option value="cyber">⚡ Cyber FM Blip</option>
+              <option value="coin">🪙 8-Bit Arcade Coin</option>
+              <option value="chime">🔔 Crystal Bell Chord</option>
+              <option value="ping">🎯 Tactical Radar Ping</option>
+              <option value="pop">🫧 Resonant Bubble Pop</option>
+              <option value="mute">🔇 Muted</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Volume <span class="val-badge" id="vol-badge">45%</span></label>
+            <div class="range-wrap">
+              <input type="range" id="volume" min="0" max="100" value="45" oninput="rangeUpdate(this,'vol-badge','%'); onFieldChange()">
+              <div class="range-val" id="vol-val">45%</div>
+            </div>
+          </div>
+          <div class="field" style="justify-content:flex-end;">
+            <button class="test-btn" style="height:38px;width:100%;font-size:11px;" onclick="testSoundFX()">🔊 Preview Sound</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Position</label>
-          <select id="pos" onchange="buildUrl()">
-            <option value="right">Right ▶</option>
-            <option value="left">Left ◀</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Font Size — <span id="size-heading">14</span>px</label>
-        <div class="range-wrap">
-          <input type="range" id="size" min="11" max="22" value="14" oninput="rangeUpdate(this,'size-heading','px'); rangeUpdate(this,'size-value','px'); buildUrl()">
-          <div class="range-val" id="size-value">14</div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Message Duration — <span id="dur-heading">25</span>s</label>
-        <div class="range-wrap">
-          <input type="range" id="dur" min="5" max="120" value="25" oninput="rangeUpdate(this,'dur-heading','s'); rangeUpdate(this,'dur-value','s'); buildUrl()">
-          <div class="range-val" id="dur-value">25</div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Max Visible Messages — <span id="max-heading">20</span></label>
-        <div class="range-wrap">
-          <input type="range" id="max" min="5" max="50" value="20" oninput="rangeUpdate(this,'max-heading',''); rangeUpdate(this,'max-value',''); buildUrl()">
-          <div class="range-val" id="max-value">20</div>
-        </div>
-      </div>
-
-      <div class="toggle-field">
-        <div>
-          <div class="toggle-label">Show Connection Status</div>
-          <div class="toggle-desc">Small indicator dot in the corner</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="status" checked onchange="buildUrl()">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
+        <label class="toggle-field">
+          <div class="toggle-info">
+            <span class="toggle-label">Enable Audio SFX</span>
+            <span class="toggle-desc">Plays procedural synth tone on new incoming messages and hype alerts</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="sound_on" checked onchange="onFieldChange()">
+            <div class="toggle-track"></div><div class="toggle-thumb"></div>
+          </label>
         </label>
       </div>
     </div>
-  </div>
 
-  <!-- OUTPUT URL -->
-  <div class="card" id="output-card">
-    <div class="card-title"><span class="icon">🔗</span> Your Browser Source URL</div>
-    <div class="url-box" id="url-out"></div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="copyUrl()">📋 Copy URL</button>
-      <button class="btn btn-secondary" onclick="copyUrlForMode('chat')">📋 Copy Chat</button>
-      <button class="btn btn-secondary" onclick="copyUrlForMode('stats')">📋 Copy Stats</button>
-      <button class="btn btn-secondary" onclick="openPreview()">👁️ Preview</button>
-      <button class="btn btn-ghost" onclick="openDemo()">🎭 Demo Mode</button>
-      <button class="btn btn-ghost" onclick="openDemoMode('stats')">🎭 Demo Stats</button>
-      <button class="btn btn-secondary" onclick="openPreviewMode('stats')">📊 Stats Source</button>
+    <!-- [06] FILTERS & ACCENTS -->
+    <div class="card" id="sec-filters">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[06]</span> Highlights, Filters &amp; Custom Accents</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-row">
+          <div class="field">
+            <label>Highlight Streamer Name</label>
+            <input type="text" id="highlight" placeholder="e.g. yourname" oninput="onFieldChange()">
+            <div class="hint">Illuminates cards with an animated golden border when your name is mentioned.</div>
+          </div>
+          <div class="field">
+            <label>Banned Words Filter</label>
+            <input type="text" id="filter" placeholder="spam, promo, badword…" oninput="onFieldChange()">
+            <div class="hint">Comma-separated words — matching messages are silently filtered.</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Primary Accent Override</label>
+            <div class="color-field">
+              <input type="color" id="accent_picker" value="#00f0ff" oninput="syncColorFromPicker('accent_picker','accent'); onFieldChange()">
+              <input type="text" id="accent" placeholder="#00f0ff" oninput="syncColorToPickerFromText('accent','accent_picker'); onFieldChange()">
+            </div>
+          </div>
+          <div class="field">
+            <label>Secondary Accent Override</label>
+            <div class="color-field">
+              <input type="color" id="accent2_picker" value="#ff007f" oninput="syncColorFromPicker('accent2_picker','accent2'); onFieldChange()">
+              <input type="text" id="accent2" placeholder="#ff007f" oninput="syncColorToPickerFromText('accent2','accent2_picker'); onFieldChange()">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Custom CSS Override
+            <span>
+              <span class="preset-css-pill" onclick="insertCssPreset('rainbow')">+ Rainbow User</span>
+              <span class="preset-css-pill" onclick="insertCssPreset('glow')">+ Neon Glow</span>
+              <span class="preset-css-pill" onclick="insertCssPreset('pill')">+ Round Pill</span>
+            </span>
+          </label>
+          <textarea id="custom_css" placeholder=".msg { border-radius: 8px; } .username { color: gold; }" oninput="onFieldChange()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- [07] OUTPUT URL -->
+    <div class="card" id="sec-output">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[07]</span> Browser Source URL — OBS Ready</div>
+      </div>
+
+      <div class="preset-row">
+        <span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--muted);text-transform:uppercase;font-weight:700;">Presets:</span>
+        <div class="preset-chip" onclick="copyPreset(420,850)">📐 Sidebar 420×850</div>
+        <div class="preset-chip" onclick="copyPreset(850,250)">📐 Bottom Bar 850×250</div>
+        <div class="preset-chip" onclick="copyPreset(320,500)">📐 Compact 320×500</div>
+        <div class="preset-chip" onclick="copyPreset(1920,1080)">📐 Full 1920×1080</div>
+      </div>
+
+      <div class="terminal-box">
+        <span style="color:var(--accent);font-weight:700;">&gt;</span>
+        <span class="terminal-url" id="url-out" title=""></span>
+        <span class="copy-tag" id="copy-tag" onclick="copyUrl()">COPY URL</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="copyUrl()">📋 Copy Overlay URL</button>
+        <button class="btn btn-secondary" onclick="openOverlay()">🚀 Open Overlay</button>
+        <button class="btn btn-ghost" onclick="openDemo()">🎭 Demo Window</button>
+      </div>
+    </div>
+
+    <!-- [08] OBS SETUP GUIDE -->
+    <div class="card" id="sec-obs">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[08]</span> OBS Studio &amp; Streamlabs Setup</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text">Host your files (GitHub Pages / Netlify) and click <strong>Copy Overlay URL</strong> above.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">In OBS Studio: <strong>Sources → + → Browser</strong>. Name it <code>Stream Chat HUD</code>.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text">Paste your <strong>Overlay URL</strong> into the URL field.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Set Width: <strong>420</strong>, Height: <strong>850</strong> (or your chosen preset resolution).</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-text">Uncheck <strong>"Shutdown source when not visible"</strong> so chat stays connected during scene switches.</div></div>
+      </div>
+    </div>
+
+    <!-- [09] FREE HOSTING OPTIONS -->
+    <div class="card" id="sec-host">
+      <div class="card-header">
+        <div class="card-title"><span class="card-step">[09]</span> Free 1-Click Hosting Options</div>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">All platforms below are 100% free and provide permanent SSL URLs for OBS Studio.</p>
+      <div class="host-grid">
+        <div class="host-card">
+          <div class="host-name" style="color:#38bdf8;">⭐ GitHub Pages</div>
+          <div class="host-desc">Push repo → Settings → Pages. Free HTTPS at <code>username.github.io/Chat-overlay/</code></div>
+        </div>
+        <div class="host-card">
+          <div class="host-name" style="color:#22c55e;">⚡ Netlify Drop</div>
+          <div class="host-desc">Drag &amp; drop project folder at <strong>netlify.com/drop</strong>. Live in 20 seconds.</div>
+        </div>
+        <div class="host-card">
+          <div class="host-name" style="color:#fcee0a;">▲ Vercel</div>
+          <div class="host-desc">Connect GitHub repo. Auto-deploys on every git push with ultra-fast CDN edge.</div>
+        </div>
+        <div class="host-card">
+          <div class="host-name" style="color:#ff9900;">🔥 Cloudflare</div>
+          <div class="host-desc">Connect GitHub to Cloudflare Pages. Unlimited bandwidth and global edge speed.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /config-col -->
+
+  <!-- ══════════════════════════════════════════════════════
+       RIGHT: STICKY LIVE PREVIEW & TEST DECK
+  ══════════════════════════════════════════════════════════ -->
+  <div class="preview-col">
+    <div class="preview-header">
+      <div class="preview-title">
+        <div class="p-dot"></div>
+        <span>LIVE PREVIEW</span>
+      </div>
+      <div class="preview-actions">
+        <button class="test-btn" onclick="refreshPreview()">↺ Reset</button>
+        <button class="test-btn" onclick="openOverlay()">⬡ Popout</button>
+      </div>
+    </div>
+
+    <div class="preview-frame-wrap" id="preview-wrap">
+      <iframe class="preview-iframe" id="live-preview" title="Live Overlay Preview"></iframe>
+    </div>
+
+    <div class="preview-footer">
+      <div class="preview-size-btns">
+        <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;margin-right:6px;">View:</span>
+        <button class="size-btn active" data-w="420" data-h="850" onclick="setPreviewSize(this)">Sidebar</button>
+        <button class="size-btn" data-w="850" data-h="250" onclick="setPreviewSize(this)">Bottom</button>
+        <button class="size-btn" data-w="320" data-h="500" onclick="setPreviewSize(this)">Compact</button>
+      </div>
+      <div class="test-deck-mini">
+        <button onclick="sendTest('chat')"   title="Send test chat">💬 Chat</button>
+        <button onclick="sendTest('sub')"    title="Simulate sub">⭐ Sub</button>
+        <button onclick="sendTest('gift')"   title="Simulate gift subs">🎁 5x Gift</button>
+        <button onclick="sendTest('raid')"   title="Simulate raid">⚡ Raid</button>
+        <button onclick="sendTest('superchat')" title="Simulate superchat">💎 $50 SC</button>
+        <button onclick="sendTest('member')" title="Simulate member">🎖️ Member</button>
+        <button onclick="sendTest('kick')"   title="Simulate Kick chat">🟢 Kick</button>
+        <button onclick="sendTest('burst')"  title="Simulate chat burst">🔥 Burst</button>
+        <button onclick="sendTest('clear')"  title="Clear chat">🧹 Clear</button>
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title"><span class="icon">📡</span> Extra Browser Sources</div>
-    <div class="source-grid">
-      <div class="source-card">
-        <h3>YouTube Live Stats</h3>
-        <p>Shows a compact channel card with subscribers, channel views, and live viewer count using the YouTube API.</p>
-        <a href="#" class="source-link" onclick="openStats(); return false;">Open YouTube Stats</a>
-      </div>
-      <div class="source-card">
-        <h3>Chat Overlay</h3>
-        <p>Use the generated browser source URL for the main gaming chat overlay with platform badges, avatars, mentions, links, and event cards.</p>
-        <a href="#" class="source-link" onclick="openPreview(); return false;">Open Chat Overlay</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- HOW TO USE -->
-  <div class="card">
-    <div class="card-title"><span class="icon">📖</span> How to Add to OBS / Streamlabs</div>
-    <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-text">Host your files (see hosting section below) and get your <strong>overlay.html URL</strong></div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-text">In OBS: <strong>Sources → + → Browser Source</strong><br>In Streamlabs: <strong>Sources → + → Browser Source</strong></div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-text">Paste your generated URL into the <strong>URL field</strong></div></div>
-      <div class="step"><div class="step-num">4</div><div class="step-text">Set Width: <strong>400</strong>, Height: <strong>800</strong> (or full canvas). Enable <strong>"Custom CSS"</strong> → add <code>body { background: transparent !important; }</code> if needed</div></div>
-      <div class="step"><div class="step-num">5</div><div class="step-text">Click <strong>OK</strong> — chat appears on your stream! 🎉 Drag to position it anywhere.</div></div>
-    </div>
-  </div>
-
-  <!-- HOSTING -->
-  <div class="card">
-    <div class="card-title"><span class="icon">☁️</span> Free Hosting Options</div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:14px">All options below are 100% free and will host your overlay as long as you need it.</p>
-    <div class="host-grid">
-      <div class="host-card">
-        <div class="host-name">⭐ GitHub Pages</div>
-        <div class="host-desc">Upload both files to a GitHub repo. Enable Pages in Settings → Pages. URL: <code>yourname.github.io/repo/overlay.html</code></div>
-        <span class="host-badge hb-free">Free Forever</span>
-        <span class="host-badge hb-best">Recommended</span>
-      </div>
-      <div class="host-card">
-        <div class="host-name">⚡ Netlify Drop</div>
-        <div class="host-desc">Go to <strong>netlify.com/drop</strong>, drag & drop your folder. Get a live URL instantly — no signup needed.</div>
-        <span class="host-badge hb-free">Free Forever</span>
-      </div>
-      <div class="host-card">
-        <div class="host-name">▲ Vercel</div>
-        <div class="host-desc">Run <code>npx vercel</code> in your folder. Or drag & drop via the Vercel dashboard. Fastest CDN globally.</div>
-        <span class="host-badge hb-free">Free Forever</span>
-      </div>
-      <div class="host-card">
-        <div class="host-name">🔥 Cloudflare Pages</div>
-        <div class="host-desc">Upload via Cloudflare dashboard. Unlimited bandwidth and requests on free tier. Zero cold starts.</div>
-        <span class="host-badge hb-free">Free Forever</span>
-      </div>
-    </div>
-    <div style="margin-top:14px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-      <p style="font-size:12px;color:var(--muted);line-height:1.7">
-        💡 <strong style="color:var(--text)">Quickest start:</strong> Use <strong style="color:#4ade80">Netlify Drop</strong> — go to <code>netlify.com/drop</code>, drag your two HTML files, and get a URL in 30 seconds. No account required.
-      </p>
-    </div>
-  </div>
-
-</div>
+</div><!-- /layout -->
 
 <div id="toast">✅ URL Copied!</div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════
+   15. APPLICATION STATE & STORAGE
+═══════════════════════════════════════════════════════════ */
 let selectedTheme = 'neon';
-let currentTab = 'twitch';
+let selectedAnim  = 'glitch';
+let selectedPos   = 'right';
+const securitySecret = Math.random().toString(36).slice(2, 10);
 
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.ptab.${tab}`).classList.add('active');
-  document.querySelectorAll('.platform-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(`section-${tab}`).classList.add('active');
-  buildUrl();
+function getOverlayBaseUrl() {
+  let base = location.href.split('?')[0].split('#')[0];
+  if (base.endsWith('/')) return base + 'overlay.html';
+  const lastSlash = base.lastIndexOf('/');
+  if (lastSlash !== -1 && base.slice(lastSlash + 1).includes('.')) {
+    return base.slice(0, lastSlash + 1) + 'overlay.html';
+  }
+  return base + '/overlay.html';
 }
 
 function selectTheme(el) {
-  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
+  document.querySelectorAll('.theme-card').forEach(s => s.classList.remove('selected'));
   el.classList.add('selected');
   selectedTheme = el.dataset.val;
-  buildUrl();
+  onFieldChange();
 }
 
-function rangeUpdate(input, labelId, suffix) {
-  const label = document.getElementById(labelId);
-  if (label) label.textContent = input.value + suffix;
+function selectAnim(el) {
+  document.querySelectorAll('.anim-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAnim = el.dataset.val;
+  onFieldChange();
+}
+
+function selectPos(el) {
+  document.querySelectorAll('.pos-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPos = el.dataset.val;
+  onFieldChange();
+}
+
+function rangeUpdate(input, badgeId, suffix) {
+  const badge = document.getElementById(badgeId);
+  const valEl = document.getElementById(badgeId.replace('-badge', '-val'));
+  const displayVal = input.value + suffix;
+  if (badge) badge.textContent = displayVal;
+  if (valEl) valEl.textContent = displayVal;
   const pct = ((input.value - input.min) / (input.max - input.min)) * 100;
   input.style.setProperty('--pct', pct + '%');
 }
 
-/* init range visuals */
-document.querySelectorAll('input[type=range]').forEach(r => {
-  const pct = ((r.value - r.min) / (r.max - r.min)) * 100;
-  r.style.setProperty('--pct', pct + '%');
-});
+function rangeUpdateDur(input) {
+  const badge = document.getElementById('dur-badge');
+  const valEl = document.getElementById('dur-val');
+  const v = Number(input.value);
+  const display = v === 0 ? '∞' : v + 's';
+  if (badge) badge.textContent = v === 0 ? '∞ (Perm)' : v + 's';
+  if (valEl) valEl.textContent = display;
+  const pct = ((v - input.min) / (input.max - input.min)) * 100;
+  input.style.setProperty('--pct', pct + '%');
+}
 
-function getOverlayBaseUrl() {
-  return new URL('overlay.html', location.href).href;
+function initRanges() {
+  document.querySelectorAll('input[type=range]').forEach(r => {
+    const pct = ((r.value - r.min) / (r.max - r.min)) * 100;
+    r.style.setProperty('--pct', pct + '%');
+  });
+}
+
+function syncColorFromPicker(pickerId, textId) {
+  const picker = document.getElementById(pickerId);
+  const text   = document.getElementById(textId);
+  if (picker && text) text.value = picker.value;
+}
+
+function syncColorToPickerFromText(textId, pickerId) {
+  const text   = document.getElementById(textId);
+  const picker = document.getElementById(pickerId);
+  if (!text || !picker) return;
+  const v = text.value.trim();
+  const hex = v.startsWith('#') ? v : (v.length === 6 || v.length === 3) ? '#' + v : null;
+  if (hex && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(hex)) {
+    picker.value = hex;
+  }
+}
+
+function updatePlatformStatus(platform, value) {
+  const el = document.getElementById(`${platform}-status`);
+  if (!el) return;
+  if (value && value.trim()) {
+    el.classList.add('has-value');
+    el.querySelector('span').textContent = value.trim();
+  } else {
+    el.classList.remove('has-value');
+    const defaults = { twitch: 'Anonymous IRC · No API key', youtube: 'Requires API key + Video ID', kick: 'Channel username or numeric ID' };
+    el.querySelector('span').textContent = defaults[platform] || '';
+  }
 }
 
 function gatherParams() {
   const p = new URLSearchParams();
-  const twitch = document.getElementById('twitch').value.trim();
-  const yt_key = document.getElementById('yt_key').value.trim();
-  const yt_vid = document.getElementById('yt_vid').value.trim();
-  const kick   = document.getElementById('kick').value.trim();
-  const avatar = document.getElementById('avatar').value.trim();
-  const sound = document.getElementById('sound').checked;
-  const volume = document.getElementById('volume').value.trim();
 
-  if (twitch)         p.set('twitch', twitch);
-  if (yt_key)         p.set('yt_key', yt_key);
-  if (yt_vid)         p.set('yt_vid', yt_vid);
-  if (kick)           p.set('kick', kick);
-  if (avatar)         p.set('avatar', avatar);
-  if (!sound)         p.set('sound', '0');
-  p.set('volume', volume || '45');
+  const twitch  = document.getElementById('twitch').value.trim();
+  const yt_key  = document.getElementById('yt_key').value.trim();
+  const yt_vid  = document.getElementById('yt_vid').value.trim();
+  const kick    = document.getElementById('kick').value.trim();
+  const kick_id = document.getElementById('kick_id').value.trim();
+  const avatar  = document.getElementById('avatar').value.trim();
+  const font    = document.getElementById('font').value;
+  const opacity = document.getElementById('opacity').value;
+  const stroke  = document.getElementById('stroke').checked;
+  const avatars = document.getElementById('avatars').checked;
+  const time    = document.getElementById('time').checked;
+  const badges  = document.getElementById('badges').checked;
+  const sound_on      = document.getElementById('sound_on').checked;
+  const sound_profile = document.getElementById('sound_profile').value;
+  const volume  = document.getElementById('volume').value;
+  const dir     = document.getElementById('dir').value;
+  const size    = document.getElementById('size').value;
+  const emote_size = document.getElementById('emote_size').value;
+  const dur     = document.getElementById('dur').value;
+  const max     = document.getElementById('max').value;
+  const highlight = document.getElementById('highlight').value.trim();
+  const filter    = document.getElementById('filter').value.trim();
+  const accent    = document.getElementById('accent').value.trim().replace(/^#/, '');
+  const accent2   = document.getElementById('accent2').value.trim().replace(/^#/, '');
+  const custom_css = document.getElementById('custom_css').value.trim();
+
+  if (twitch)  p.set('twitch', twitch);
+  if (yt_key)  p.set('yt_key', yt_key);
+  if (yt_vid)  p.set('yt_vid', yt_vid);
+  if (kick)    p.set('kick', kick);
+  if (kick_id) p.set('kick_id', kick_id);
+  if (avatar)  p.set('avatar', avatar);
 
   p.set('theme', selectedTheme);
-  p.set('anim',  document.getElementById('anim').value);
-  p.set('pos',   document.getElementById('pos').value);
-  p.set('size',  document.getElementById('size').value);
-  p.set('dur',   document.getElementById('dur').value);
-  p.set('max',   document.getElementById('max').value);
-  if (!document.getElementById('status').checked) p.set('status', '0');
+  if (font) p.set('font', font);
+  if (opacity !== '90') p.set('opacity', opacity);
+  if (stroke) p.set('stroke', '1');
+  if (!avatars) p.set('avatars', '0');
+  if (time) p.set('time', '1');
+  if (!badges) p.set('badges', '0');
 
+  p.set('anim', selectedAnim);
+  p.set('pos', selectedPos);
+  if (dir !== 'up') p.set('dir', dir);
+  if (size !== '14') p.set('size', size);
+  if (emote_size !== '26') p.set('emote_size', emote_size);
+  p.set('dur', dur);
+  p.set('max', max);
+
+  if (!sound_on) p.set('sound', '0');
+  if (sound_profile !== 'cyber') p.set('sound_profile', sound_profile);
+  if (volume && volume !== '45') p.set('volume', (Number(volume) / 100).toFixed(2));
+
+  if (highlight) p.set('highlight', highlight);
+  if (filter)    p.set('filter', filter);
+  if (accent)    p.set('accent', accent);
+  if (accent2)   p.set('accent2', accent2);
+  if (custom_css) p.set('custom_css', custom_css);
+
+  p.set('secret', securitySecret);
   return p;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   16. LIVE PREVIEW & REACTIVE POSTMESSAGE SYNC
+═══════════════════════════════════════════════════════════ */
+let previewInitialized = false;
+let configDebounce = null;
+
+function initPreview() {
+  const iframe = document.getElementById('live-preview');
+  const base = getOverlayBaseUrl();
+  const p = gatherParams();
+  p.set('demo', '1');
+  p.set('sound', '0');
+  iframe.onload = () => {
+    previewInitialized = true;
+  };
+  iframe.src = base + '?' + p.toString();
+}
+
+function sendConfigUpdate() {
+  const iframe = document.getElementById('live-preview');
+  if (!iframe || !iframe.contentWindow || !previewInitialized) return;
+
+  const font = document.getElementById('font').value;
+  const opacity = document.getElementById('opacity').value;
+  const stroke = document.getElementById('stroke').checked;
+  const avatars = document.getElementById('avatars').checked;
+  const time = document.getElementById('time').checked;
+  const badges = document.getElementById('badges').checked;
+  const dir = document.getElementById('dir').value;
+  const size = document.getElementById('size').value;
+  const emote_size = document.getElementById('emote_size').value;
+  const accent = document.getElementById('accent').value.trim().replace(/^#/, '');
+  const accent2 = document.getElementById('accent2').value.trim().replace(/^#/, '');
+
+  iframe.contentWindow.postMessage({
+    kind: 'config_update',
+    secret: securitySecret,
+    theme: selectedTheme,
+    anim: selectedAnim,
+    pos: selectedPos,
+    font,
+    opacity: Number(opacity),
+    stroke,
+    avatars,
+    timestamps: time,
+    badges,
+    dir,
+    fontSize: Number(size),
+    emoteSize: Number(emote_size),
+    accent: accent || null,
+    accent2: accent2 || null,
+  }, '*');
+}
+
+function onFieldChange() {
+  buildUrl();
+  saveStateToLocalStorage();
+  clearTimeout(configDebounce);
+  configDebounce = setTimeout(sendConfigUpdate, 60);
 }
 
 function buildUrl() {
   const base = getOverlayBaseUrl();
   const p = gatherParams();
-  p.set('mode', 'all');
-  const hasSource = p.has('twitch') || (p.has('yt_key') && p.has('yt_vid')) || p.has('kick');
   const urlEl = document.getElementById('url-out');
-  if (hasSource) {
-    urlEl.textContent = base + '?' + p.toString();
-  } else {
-    urlEl.textContent = '';
-  }
+  const fullUrl = base + '?' + p.toString();
+  urlEl.textContent = fullUrl;
+  urlEl.setAttribute('title', fullUrl);
 }
 
-function buildStatsUrl() {
-  const base = getOverlayBaseUrl();
-  const p = gatherParams();
-  const yt_key = document.getElementById('yt_key').value.trim();
-  const yt_vid = document.getElementById('yt_vid').value.trim();
-  if (!yt_key || !yt_vid) {
-    alert('For YouTube stats, fill in the YouTube API key and live video ID first.');
-    return '';
-  }
-  p.set('mode', 'stats');
-  p.set('yt_key', yt_key);
-  p.set('yt_vid', yt_vid);
-  return `${base}?${p.toString()}`;
+function refreshPreview() {
+  previewInitialized = false;
+  initPreview();
 }
 
-function buildUrlForMode(mode) {
-  const base = getOverlayBaseUrl();
-  const p = gatherParams();
-  p.set('mode', mode || 'all');
-  return `${base}?${p.toString()}`;
+function setPreviewSize(btn) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const wrap = document.getElementById('preview-wrap');
+  const w = Number(btn.dataset.w);
+  const h = Number(btn.dataset.h);
+  const panelW = wrap.clientWidth - 2;
+  const panelH = wrap.clientHeight - 2;
+  const scale = Math.min(panelW / w, panelH / h, 1);
+  const iframe = document.getElementById('live-preview');
+  iframe.style.width  = w + 'px';
+  iframe.style.height = h + 'px';
+  iframe.style.transform = `scale(${scale})`;
+  iframe.style.transformOrigin = 'top left';
+  iframe.style.position = 'absolute';
+  iframe.style.top = '0'; iframe.style.left = '0';
 }
 
-function copyUrlForMode(mode) {
-  const url = buildUrlForMode(mode);
-  if (!url) { alert('Fill in at least one platform first!'); return; }
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(url).then(() => {
-      const t = document.getElementById('toast');
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
-    }).catch(() => fallbackCopy(url, () => {}));
-    return;
-  }
-  fallbackCopy(url, () => {});
-}
-
-function openPreviewMode(mode) {
-  const url = buildUrlForMode(mode);
-  if (!url) { alert('Fill in at least one platform first!'); return; }
-  window.open(url, '_blank');
+/* ═══════════════════════════════════════════════════════════
+   17. COPY & CLIPBOARD
+═══════════════════════════════════════════════════════════ */
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type ? `show ${type}` : 'show';
+  setTimeout(() => t.className = '', 2600);
 }
 
 function copyUrl() {
   const url = document.getElementById('url-out').textContent;
-  if (!url) { alert('Fill in at least one platform first!'); return; }
-  const showToast = () => {
-    const t = document.getElementById('toast');
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+  if (!url) return;
+  const tag = document.getElementById('copy-tag');
+  const doSuccess = () => {
+    tag.textContent = '✓ COPIED';
+    showToast('✅ Overlay URL Copied!', 'success');
+    setTimeout(() => tag.textContent = 'COPY URL', 2000);
   };
-
   if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(url).then(showToast).catch(() => fallbackCopy(url, showToast));
-    return;
-  }
-
-  fallbackCopy(url, showToast);
-}
-
-function fallbackCopy(url, onSuccess) {
-  const temp = document.createElement('textarea');
-  temp.value = url;
-  temp.setAttribute('readonly', 'true');
-  temp.style.position = 'fixed';
-  temp.style.left = '-9999px';
-  document.body.appendChild(temp);
-  temp.select();
-  try {
-    document.execCommand('copy');
-    onSuccess();
-  } catch {
-    alert('Copy failed. Please select the URL and copy it manually.');
-  } finally {
-    document.body.removeChild(temp);
+    navigator.clipboard.writeText(url).then(doSuccess).catch(() => fallbackCopy(url, doSuccess));
+  } else {
+    fallbackCopy(url, doSuccess);
   }
 }
 
-function openPreview() {
+function copyPreset(w, h) {
+  copyUrl();
+  showToast(`✅ Copied! Set OBS Browser Source to ${w}×${h}px`, 'success');
+}
+
+function fallbackCopy(text, onSuccess) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); onSuccess?.(); }
+  catch { showToast('❌ Please copy manually'); }
+  finally { document.body.removeChild(ta); }
+}
+
+function openOverlay() {
   const url = document.getElementById('url-out').textContent;
-  if (!url) { alert('Fill in at least one platform first!'); return; }
-  window.open(url, '_blank');
+  if (url) window.open(url, '_blank');
 }
 
 function openDemo() {
   const base = getOverlayBaseUrl();
-  const p = new URLSearchParams({ demo: '1', theme: selectedTheme,
-    anim: document.getElementById('anim').value,
-    pos:  document.getElementById('pos').value,
-    size: document.getElementById('size').value,
-    dur:  document.getElementById('dur').value,
-    max:  document.getElementById('max').value });
-  const avatar = document.getElementById('avatar').value.trim();
-  if (avatar) p.set('avatar', avatar);
-  window.open(base + '?' + p.toString(), '_blank');
-}
-
-function openDemoMode(mode) {
-  const base = getOverlayBaseUrl();
   const p = gatherParams();
   p.set('demo', '1');
-  p.set('mode', mode || 'all');
   window.open(base + '?' + p.toString(), '_blank');
 }
 
-function openStats() {
-  const url = buildStatsUrl();
-  if (url) window.open(url, '_blank');
+/* ═══════════════════════════════════════════════════════════
+   18. COMPREHENSIVE STREAM TEST DECK
+═══════════════════════════════════════════════════════════ */
+function sendTest(type) {
+  const iframe = document.getElementById('live-preview');
+  if (!iframe || !iframe.contentWindow) return;
+  const target = iframe.contentWindow;
+
+  if (type === 'clear') {
+    target.postMessage({ kind: 'clear', secret: securitySecret }, '*');
+    return;
+  }
+
+  const fakeColors = ['#00f0ff','#ff007f','#ff5500','#00ff66','#c084fc','#38bdf8','#fb7185','#fbbf24','#4ade80'];
+  const fakeNames  = ['ViperGamer','NeonSamurai','CyberStriker','PixelQueen','RaidBoss','PhantomX','EchoMod','AceSniper','ShadowWolf'];
+  const rColor = fakeColors[Math.floor(Math.random() * fakeColors.length)];
+  const rName  = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+  const platforms = ['twitch','kick','youtube'];
+  const rPlat  = platforms[Math.floor(Math.random() * platforms.length)];
+  const testMsgs = [
+    'This overlay looks absolutely insane!! KEKW 🔥',
+    'PogChamp what a clutch play no way!!',
+    'catJAM this song goes hard ngl',
+    'GG WP no re that was clean OMEGALUL',
+    'Let\'s GOOO first try!! 🎯🎯🎯',
+    'Huge play! Sub hype!! Pog',
+    'Chat we cooking tonight, W stream 🍳',
+    'monkaW the enemy team is flanking behind us!',
+    'ICANT this streamer is too funny KEKW',
+  ];
+
+  if (type === 'chat') {
+    target.postMessage({
+      kind: 'chat', secret: securitySecret,
+      user: rName, color: rColor, platform: rPlat,
+      text: testMsgs[Math.floor(Math.random() * testMsgs.length)],
+      badges: Math.random() > 0.5 ? ['subscriber'] : [],
+    }, '*');
+  } else if (type === 'sub') {
+    target.postMessage({ kind: 'event', secret: securitySecret, user: rName, platform: 'twitch', isEvent: true, eventIcon: '🌟', eventTitle: 'New Subscription', eventSubtitle: `${rName} subscribed with Prime Gaming!`, eventAmount: 'TIER 1 SUB' }, '*');
+  } else if (type === 'gift') {
+    target.postMessage({ kind: 'event', secret: securitySecret, user: rName, platform: 'twitch', isEvent: true, eventIcon: '🎁', eventTitle: 'Community Gift', eventSubtitle: `${rName} gifted 5 Tier 1 Subs to the stream!`, eventAmount: '5 GIFT SUBS' }, '*');
+  } else if (type === 'raid') {
+    const raiders = [50, 120, 250, 500, 1500][Math.floor(Math.random() * 5)];
+    target.postMessage({ kind: 'event', secret: securitySecret, user: rName, platform: 'twitch', isEvent: true, eventIcon: '⚡', eventTitle: 'Incoming Raid', eventSubtitle: `${rName} is raiding with ${raiders} raiders!`, eventAmount: `${raiders} RAIDERS` }, '*');
+  } else if (type === 'superchat') {
+    const amounts = ['$10.00','$20.00','$50.00','$100.00'];
+    const amt = amounts[Math.floor(Math.random() * amounts.length)];
+    target.postMessage({ kind: 'event', secret: securitySecret, user: rName, platform: 'youtube', isEvent: true, eventIcon: '💬', eventTitle: 'Super Chat', eventSubtitle: 'Amazing stream! Keep crushing it! 🔥❤️', eventAmount: amt }, '*');
+  } else if (type === 'member') {
+    target.postMessage({ kind: 'event', secret: securitySecret, user: rName, platform: 'youtube', isEvent: true, eventIcon: '🎖️', eventTitle: 'New Member', eventSubtitle: `${rName} joined as a Tier 2 Channel Member!`, eventAmount: 'SPONSOR' }, '*');
+  } else if (type === 'kick') {
+    target.postMessage({ kind: 'chat', secret: securitySecret, user: rName, color: '#53b94f', platform: 'kick', text: 'Kick chat connected! catJAM W stream!', badges: ['subscriber'] }, '*');
+  } else if (type === 'burst') {
+    for (let i = 0; i < 7; i++) {
+      setTimeout(() => {
+        const u = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+        const c = fakeColors[Math.floor(Math.random() * fakeColors.length)];
+        const m = testMsgs[Math.floor(Math.random() * testMsgs.length)];
+        target.postMessage({ kind: 'chat', secret: securitySecret, user: u, color: c, platform: 'twitch', text: m }, '*');
+      }, i * 150);
+    }
+  }
 }
 
+function testSoundFX() {
+  const profile = document.getElementById('sound_profile').value;
+  const iframe  = document.getElementById('live-preview');
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({ kind: 'test_sound', profile, secret: securitySecret }, '*');
+  }
+}
+
+function insertCssPreset(preset) {
+  const ta = document.getElementById('custom_css');
+  if (preset === 'rainbow') {
+    ta.value += '\n.username { background: linear-gradient(90deg, #ff007f, #00f0ff, #fcee0a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }';
+  } else if (preset === 'glow') {
+    ta.value += '\n.msg { box-shadow: 0 0 20px rgba(0,240,255,0.4) !important; }';
+  } else if (preset === 'pill') {
+    ta.value += '\n.msg { border-radius: 20px !important; clip-path: none !important; }';
+  }
+  onFieldChange();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   19. LOCALSTORAGE PERSISTENCE
+═══════════════════════════════════════════════════════════ */
+function saveStateToLocalStorage() {
+  try {
+    const state = {
+      twitch: document.getElementById('twitch').value,
+      yt_key: document.getElementById('yt_key').value,
+      yt_vid: document.getElementById('yt_vid').value,
+      kick: document.getElementById('kick').value,
+      kick_id: document.getElementById('kick_id').value,
+      avatar: document.getElementById('avatar').value,
+      theme: selectedTheme,
+      anim: selectedAnim,
+      pos: selectedPos,
+      font: document.getElementById('font').value,
+      opacity: document.getElementById('opacity').value,
+      stroke: document.getElementById('stroke').checked,
+      avatars: document.getElementById('avatars').checked,
+      time: document.getElementById('time').checked,
+      badges: document.getElementById('badges').checked,
+      sound_on: document.getElementById('sound_on').checked,
+      sound_profile: document.getElementById('sound_profile').value,
+      volume: document.getElementById('volume').value,
+      dir: document.getElementById('dir').value,
+      size: document.getElementById('size').value,
+      emote_size: document.getElementById('emote_size').value,
+      dur: document.getElementById('dur').value,
+      max: document.getElementById('max').value,
+      highlight: document.getElementById('highlight').value,
+      filter: document.getElementById('filter').value,
+      accent: document.getElementById('accent').value,
+      accent2: document.getElementById('accent2').value,
+      custom_css: document.getElementById('custom_css').value,
+    };
+    localStorage.setItem('streamchat_config_v3', JSON.stringify(state));
+  } catch {}
+}
+
+function restoreStateFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('streamchat_config_v3');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s.twitch) { document.getElementById('twitch').value = s.twitch; updatePlatformStatus('twitch', s.twitch); }
+    if (s.yt_key) { document.getElementById('yt_key').value = s.yt_key; updatePlatformStatus('youtube', s.yt_key); }
+    if (s.yt_vid) document.getElementById('yt_vid').value = s.yt_vid;
+    if (s.kick) { document.getElementById('kick').value = s.kick; updatePlatformStatus('kick', s.kick); }
+    if (s.kick_id) document.getElementById('kick_id').value = s.kick_id;
+    if (s.avatar) document.getElementById('avatar').value = s.avatar;
+    if (s.theme) {
+      selectedTheme = s.theme;
+      document.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.val === s.theme);
+      });
+    }
+    if (s.anim) {
+      selectedAnim = s.anim;
+      document.querySelectorAll('.anim-chip').forEach(c => {
+        c.classList.toggle('selected', c.dataset.val === s.anim);
+      });
+    }
+    if (s.pos) {
+      selectedPos = s.pos;
+      document.querySelectorAll('.pos-chip').forEach(c => {
+        c.classList.toggle('selected', c.dataset.val === s.pos);
+      });
+    }
+    if (s.font !== undefined) document.getElementById('font').value = s.font;
+    if (s.opacity !== undefined) { document.getElementById('opacity').value = s.opacity; rangeUpdate(document.getElementById('opacity'), 'opacity-badge', '%'); }
+    if (s.stroke !== undefined) document.getElementById('stroke').checked = s.stroke;
+    if (s.avatars !== undefined) document.getElementById('avatars').checked = s.avatars;
+    if (s.time !== undefined) document.getElementById('time').checked = s.time;
+    if (s.badges !== undefined) document.getElementById('badges').checked = s.badges;
+    if (s.sound_on !== undefined) document.getElementById('sound_on').checked = s.sound_on;
+    if (s.sound_profile) document.getElementById('sound_profile').value = s.sound_profile;
+    if (s.volume !== undefined) { document.getElementById('volume').value = s.volume; rangeUpdate(document.getElementById('volume'), 'vol-badge', '%'); }
+    if (s.dir) document.getElementById('dir').value = s.dir;
+    if (s.size !== undefined) { document.getElementById('size').value = s.size; rangeUpdate(document.getElementById('size'), 'size-badge', 'px'); }
+    if (s.emote_size !== undefined) { document.getElementById('emote_size').value = s.emote_size; rangeUpdate(document.getElementById('emote_size'), 'emote-badge', 'px'); }
+    if (s.dur !== undefined) { document.getElementById('dur').value = s.dur; rangeUpdateDur(document.getElementById('dur')); }
+    if (s.max !== undefined) { document.getElementById('max').value = s.max; rangeUpdate(document.getElementById('max'), 'max-badge', ''); }
+    if (s.highlight) document.getElementById('highlight').value = s.highlight;
+    if (s.filter) document.getElementById('filter').value = s.filter;
+    if (s.accent) { document.getElementById('accent').value = s.accent; syncColorToPickerFromText('accent', 'accent_picker'); }
+    if (s.accent2) { document.getElementById('accent2').value = s.accent2; syncColorToPickerFromText('accent2', 'accent2_picker'); }
+    if (s.custom_css) document.getElementById('custom_css').value = s.custom_css;
+  } catch {}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   20. BOOTSTRAP
+═══════════════════════════════════════════════════════════ */
+restoreStateFromLocalStorage();
+initRanges();
 buildUrl();
+initPreview();
 </script>
 </body>
 </html>

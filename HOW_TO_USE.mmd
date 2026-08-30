@@ -1,61 +1,54 @@
-# How To Use
+# How To Use — StreamChat Pro Gamer HUD Overlay
 
 ```mermaid
 flowchart TD
-  A[Open index.html] --> B[Choose Twitch, YouTube, Kick, or Demo]
-  B --> C[Set theme, animation, size, duration, and max messages]
-  C --> D[Copy the generated overlay URL]
-  D --> E[Paste URL into OBS or Streamlabs Browser Source]
-  E --> F[Load overlay.html]
-  F --> G[Messages render live]
+  A[Open index.html Command Deck] --> B[Enter Twitch, YouTube, and/or Kick channel]
+  B --> C[Select 1 of 10 Pro Gamer Themes & 60fps Animation]
+  C --> D[Customize Typography, Opacity, Text Stroke, Badges & FM Synth Audio]
+  D --> E[Use Interactive Stream Test Deck to Preview Live Chats & Hype Alerts]
+  E --> F[Select OBS Resolution Preset & Copy Overlay URL]
+  F --> G[Add Browser Source in OBS Studio / Streamlabs]
+  G --> H[Crystal Clear Transparent Gamer HUD Live on Stream]
 ```
 
 ```mermaid
 flowchart LR
-  subgraph Setup
-    S1[index.html]
-    S2[Build URL]
-    S3[Copy / Preview / Demo]
+  subgraph Config ["Command Deck (index.html)"]
+    S1[Multi-Platform Inputs]
+    S2[Interactive Test Deck]
+    S3[10-Theme Customizer]
+    S4[Generate Secure URL]
   end
 
-  subgraph Runtime
-    R1[overlay.html]
-    R2[Connect to platform]
-    R3[Queue messages]
-    R4[Render cards]
+  subgraph Engine ["Runtime HUD Engine (overlay.html)"]
+    R1[Read Parameters & Themes]
+    R2[Multi-Platform WebSockets / REST]
+    R3[60+ Emote Engine + 7TV / BTTV / FFZ]
+    R4[BigEmote Scaler & Word Filter]
+    R5[Smooth 60fps Queue & Scrollback Buffer]
+    R6[Multi-Tier Event Alerts & Highlights]
+    R7[Procedural Web Audio FM Synthesizer]
   end
 
-  S1 --> S2 --> S3 --> R1 --> R2 --> R3 --> R4
+  S1 --> S2 --> S3 --> S4 --> R1 --> R2 --> R3 --> R4 --> R5 --> R6 --> R7
 ```
 
-## URL Examples
+## URL Parameter Examples
 
 ```text
-overlay.html?twitch=ninja&theme=neon&anim=slide&pos=right&size=14&dur=25&max=20
-overlay.html?yt_key=YOUR_KEY&yt_vid=VIDEO_ID&theme=cyber&anim=float
-overlay.html?kick=trainwreck&avatar=https://example.com/logo.png&demo=0
-overlay.html?demo=1&theme=mono&status=0
+overlay.html?twitch=tarik&theme=neon&anim=glitch&pos=right&size=14&dur=25&max=20&stroke=1
+overlay.html?twitch=shroud&theme=stealth&font=inter&opacity=0&stroke=1&sound_profile=ping
+overlay.html?kick=xqc&kick_id=123456&theme=valorant&anim=slide&sound_profile=coin
+overlay.html?yt_key=AIzaSy...&yt_vid=dQw4w9WgXcQ&theme=glass&font=chakra
+overlay.html?demo=1&theme=synthwave&anim=glitch&sound_profile=cyber&status=1
 ```
 
-## OBS Steps
+## Features Summary
 
-1. Host the files on GitHub Pages, Netlify, Vercel, or another static host.
-2. Open `index.html` and generate the overlay URL.
-3. Add a Browser Source in OBS.
-4. Paste the URL.
-5. Set a resolution that gives the chat room enough room to breathe.
-6. Use the transparent CSS fallback if needed.
-
-## Behavior Summary
-
-- Twitch connects anonymously over IRC WebSocket.
-- YouTube polls the live chat API using your API key.
-- Kick subscribes to the channel chat WebSocket.
-- Demo mode cycles through example messages so you can test the design without a live source.
-
-## Notes
-
-- The overlay is static and does not need a build step.
-- Message cards expire automatically after the configured duration.
-- The visible message count is capped so the overlay stays readable.
-- Platform badges and event cards are generated from the payload when the platform exposes that data.
+- **60+ Built-in + 7TV / BTTV / FFZ Animated Emotes:** Instant live rendering of top streamer emotes with zero latency.
+- **BigEmote Auto-Scaling:** Messages with 1–3 emotes automatically scale to 1.8x size.
+- **Card Background Opacity & Stroke:** Adjust from 100% solid HUD card to 0% pure floating text with high-contrast drop outline.
+- **Hardware Glitch & 60fps Animations:** Smooth GPU-accelerated RGB displacement without CSS clipping corruption.
+- **Procedural FM Synthesizer:** 6 custom synthesized sound profiles (`cyber`, `coin`, `chime`, `ping`, `pop`, `mute`).
+- **Interactive Stream Test Deck:** Test incoming chats, subs, gift sub bombs, raids, and SuperChats with 1 click.
+- **Zero Dependencies:** Pure HTML5 / CSS3 / ES2022.

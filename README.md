@@ -1,221 +1,120 @@
-# Chat Overlay
+# StreamChat Overlay — Pro Gamer HUD Engine
 
-StreamChat Overlay is a static browser-source overlay for live chat from Twitch, YouTube, and Kick.
-It is designed to be opened directly in OBS, Streamlabs, or any browser source that supports a hosted HTML page.
+**StreamChat Overlay** is a zero-dependency, ultra-fast, static browser-source chat overlay engineered specifically for gaming streamers on **OBS Studio**, **Streamlabs**, and **Prism Live**. It connects natively and simultaneously to **Twitch (Anonymous IRC WebSocket)**, **YouTube Live (Data API v3)**, and **Kick (Pusher WebSocket)**.
 
-The repository is intentionally small:
+Built with authentic cyberpunk and tactical **Gamer HUD aesthetics**: 10 distinct pro gamer themes, 7TV / BetterTTV / FrankerFaceZ animated emote rendering with 60+ instant offline fallbacks, hardware-accelerated animations, BigEmote auto-scaling, customizable card opacity (down to pure floating text with high-contrast outline), multi-tier SuperChats and Event alerts, and a built-in procedural Web Audio FM synthesizer.
 
-- `index.html` is the setup and URL builder.
-- `overlay.html` is the live overlay that renders messages.
-- There is no backend, build step, or package manager dependency.
+---
 
-## What it does
+## ⚡ Key Highlights
 
-This project turns live chat feeds into an animated, stream-ready overlay. It supports:
+- **Pure Static Stack:** Zero Node.js, zero npm, zero build steps. Instant deployment on GitHub Pages, Netlify, Vercel, Cloudflare, or local files.
+- **Multi-Platform Simultaneous Chat:** Stream to Twitch, YouTube, and Kick at the same time and combine all chats into a single unified stream overlay.
+- **60+ Built-in + 7TV, BTTV & FFZ Animated Emotes:** Instant zero-latency rendering of top streamer emotes (`KEKW`, `OMEGALUL`, `catJAM`, `Pog`, `monkaW`, `pepeL`, `ICANT`, `AYAYA`, `GIGACHAD`, `Copium`, `widepeepoHappy`, `PogChamp`, `Kappa`, `LUL`, etc.) plus automatic live async fetching.
+- **BigEmote Auto-Scaling:** Messages containing only 1–3 emotes automatically scale to 1.8x size (Twitch/Kick native style).
+- **10 Pro Gamer HUD Themes:** Cyberpunk 2077, Valorant Tactical, OLED Stealth (Shroud/Tarik Minimal), Magma Forge (Apex Champion), Matrix Terminal, Synthwave 80s Outrun, Liquid Frosted Glass, Sakura Kawaii Anime, Hextech Arcane, and Pure Floating Contour.
+- **Hardware-Accelerated 60fps Animations:** Smooth GPU-accelerated Chromatic Glitch, Tactical Spring Slide, Elastic Pop, Silky Fade, Cinematic Float, and Zoom Snap with smooth height-collapse exit transitions.
+- **Multi-Tier Event Alerts:** Eye-catching cards for Twitch Subscriptions & Resubs, 5x Community Gift Sub Bombs, 500-viewer Raids, Bits/Cheers, YouTube Channel Memberships, and color-coded YouTube SuperChats ($2, $5, $10, $20, $50, $100+ tiers).
+- **Customizable Card Opacity & Text Stroke:** Set card opacity from 100% solid HUD card down to 0% (pure transparent floating text) with customizable high-contrast text contour outline for 100% readability over high-action gameplay (snow maps, flashbangs, explosions).
+- **Interactive Command Deck & Live Preview:** Real-time reactive preview in `index.html` with zero-lag `postMessage` synchronization, multi-scenario stream test deck, soundboard, and localStorage autosave.
+- **Procedural Web Audio FM Synthesizer:** 6 custom synthesized sound FX profiles (`Cyber FM Blip`, `8-Bit Arcade Coin`, `Crystal Bell Chord`, `Tactical Radar Ping`, `Resonant Bubble Pop`, `Muted`) with volume control and safe AudioContext auto-resumption for OBS browser sources.
+- **Scrollback Buffer:** Pause auto-scroll when inspecting older messages with a clickable `↓ New Messages` badge.
+- **Security Hardened:** Strict `postMessage` origin and secret token validation to prevent unauthorized frame injection.
 
-- Twitch chat through IRC WebSocket.
-- YouTube live chat through the YouTube Data API v3.
-- Kick chat through Kick's public WebSocket endpoint.
-- Theme, animation, font size, placement, message limit, and message lifetime controls.
-- Avatar/logo fallback support for platforms that do not provide profile images reliably.
-- Badges for common roles such as broadcaster, moderator, subscriber, VIP, partner, and platform-specific membership markers.
-- Demo mode for previewing the overlay without connecting to a live chat.
+---
 
-## How It Works
+## 🎮 10 Distinct Pro Gamer HUD Themes
 
-The setup page builds a browser-source URL with query parameters. That URL points at `overlay.html`, which reads the parameters and connects to the requested platform(s).
+| Theme ID | Visual Style & Aesthetic | Primary Accents |
+|---|---|---|
+| `neon` | **Cyberpunk 2077 / Neo-Tokyo** with cyan/magenta glow & CRT scanlines | `#00f0ff` / `#ff007f` |
+| `valorant` | **Valorant / Tactical Sci-Fi** with sharp 45° chamfers & killfeed styling | `#ff4655` / `#ece8e1` |
+| `stealth` | **OLED Stealth (Shroud / Tarik)** ultra-clean distraction-free graphite & white | `#ffffff` / `#a1a1aa` |
+| `fire` | **Magma Forge / Apex Champion** molten crimson & flame gold with ember pulses | `#ff3700` / `#ffaa00` |
+| `cyber` | **Matrix Terminal / Netrunner** phosphor green with ASCII dashed border | `#00ff66` / `#00f0ff` |
+| `synthwave` | **Outrun 80s Synthwave** sunset pink & gold gradient with retro glow | `#f43f5e` / `#fbbf24` |
+| `glass` | **Frosted Glass / Liquid HUD** 24px backdrop blur & specular inner highlight | `#ffffff` / `#94a3b8` |
+| `rose` | **Sakura Kawaii / Anime** soft pastel pink pill cards with bounce animation | `#fb7185` / `#f43f5e` |
+| `ocean` | **Hextech Arcane / Deep Abyssal** arcane rune blue & teal wave gradient | `#0ea5e9` / `#14b8a6` |
+| `floating` | **Pure Floating Contour** 0% background with 2px high-contrast black outline | `#ffffff` / `#00f0ff` |
 
-```mermaid
-flowchart LR
-  A[Open index.html] --> B[Choose platform and visual settings]
-  B --> C[Copy generated overlay.html URL]
-  C --> D[Paste into OBS or Streamlabs Browser Source]
-  D --> E[overlay.html reads query params]
-  E --> F[Connect to Twitch, YouTube, Kick, or Demo]
-  F --> G[Render animated chat cards]
-```
+*Legacy theme aliases (`cyberpunk`, `tactical`, `magma`, `synthwave`, `matrix`, `frost`, `kawaii`, `hextech`, `minimal`, `pure`) are also fully supported.*
 
-## Repository Layout
+---
 
-| File | Purpose |
-| --- | --- |
-| `index.html` | Setup UI, URL generation, host instructions, preview and demo launchers. |
-| `overlay.html` | Runtime overlay that connects to chat sources and renders message cards. |
+## 🕹️ Visual & Streamer Controls
 
-## Quick Start
+- **Typography Options:** `Rajdhani` (Tactical Sci-Fi), `Chakra Petch` (Cyber Mecha), `Orbitron` (Futuristic Heavy), `Space Mono` (Terminal Code), `Inter` (Modern Crisp Clean), and `Press Start 2P` (8-Bit Arcade).
+- **Background Opacity:** Range from `0%` (pure floating text) to `100%` (solid HUD card).
+- **Text Stroke / Outline:** Enable high-contrast drop shadow and outline to guarantee crystal-clear readability over bright maps (snow, explosions, daylight).
+- **Chat Flow Direction:** `up` (standard bottom-up stream chat) or `down` (top-to-bottom waterfall list).
+- **Dock Placement:** `right` (bottom right), `left` (bottom left), `top-right`, or `top-left`.
+- **Emote Scaling:** Adjust emote scale from `20px` to `42px`.
+- **Message Duration:** Configurable lifetime (`5s` to `120s`), or set `dur=0` for **permanent** chat log mode.
+- **Toggles:** Show/hide avatars, timestamps (`[HH:MM]`), badges, and status indicator dot.
 
-1. Open `index.html` in a browser.
-2. Fill in at least one supported platform source.
-3. Tune the visual settings as needed.
-4. Copy the generated browser-source URL.
-5. Paste that URL into OBS, Streamlabs, or another browser source.
+---
 
-If you want a fast preview without a live platform connection, use Demo Mode.
+## 🛠️ Complete URL Parameters Reference
 
-## Platform Support
-
-### Twitch
-
-Twitch uses anonymous IRC over WebSocket.
-
-What the overlay reads:
-
-- Channel name.
-- Chat messages.
-- Twitch badges.
-- Twitch emotes via the rendered emote IDs.
-- Some event messages such as subscriptions, resubs, raids, gift subs, and bits.
-
-No Twitch API key is required.
-
-### YouTube
-
-YouTube uses the YouTube Data API v3.
-
-What the overlay reads:
-
-- Live video ID.
-- API key.
-- Chat messages from the active live chat.
-- Author profile image when available.
-- Broadcaster, moderator, and channel-member style indicators.
-- Super Chat and membership-style event cards when the API exposes those payloads.
-
-You must provide both the API key and the live video ID.
-
-### Kick
-
-Kick uses a public channel lookup plus WebSocket chat subscription.
-
-What the overlay reads:
-
-- Kick channel username.
-- Chat messages.
-- Profile image when available.
-- Broadcaster, moderator, and subscriber-style markers.
-- Follow, sub, gift, raid, and membership-style events when detected from the payload.
-
-No Kick API key is required.
-
-## URL Parameters
-
-The generated browser-source URL points at `overlay.html` with one or more query parameters.
-
-| Parameter | Example | Meaning |
-| --- | --- | --- |
-| `twitch` | `ninja` | Twitch channel username. |
-| `yt_key` | `AIza...` | YouTube Data API v3 key. |
-| `yt_vid` | `dQw4w9WgXcQ` | YouTube live video ID. |
+| Parameter | Example | Description |
+|---|---|---|
+| `twitch` | `tarik` | Twitch channel username (anonymous IRC WebSocket). |
+| `yt_key` | `AIzaSy...` | YouTube Data API v3 key. |
+| `yt_vid` | `dQw4w9WgXcQ` | YouTube live stream video ID. |
 | `kick` | `xqc` | Kick channel username. |
-| `avatar` | `https://.../logo.png` | Fallback avatar or brand image URL. |
-| `theme` | `neon` | Visual theme name. |
-| `anim` | `slide` | Entry animation style. |
-| `pos` | `right` | Overlay side, `right` or `left`. |
-| `size` | `14` | Font size in pixels. |
-| `dur` | `25` | Message lifetime in seconds. |
-| `max` | `20` | Maximum visible messages. |
-| `status` | `0` | Hides the connection status indicator when set to `0`. |
-| `demo` | `1` | Runs demo mode instead of connecting to a platform. |
+| `kick_id`| `123456` | Direct numeric Kick chatroom ID for 100% reliable Pusher connection. |
+| `theme` | `neon` | Theme preset (`neon`, `valorant`, `stealth`, `fire`, `cyber`, `synthwave`, `glass`, `rose`, `ocean`, `floating`). |
+| `font` | `chakra` | Font family override (`rajdhani`, `chakra`, `orbitron`, `space-mono`, `inter`, `press-start`). |
+| `opacity`| `50` | Card background opacity percentage (`0` = pure floating text, `100` = solid). |
+| `stroke` | `1` | Enable high-contrast text stroke / outline (`1` or `0`). |
+| `anim` | `glitch` | Entry animation (`glitch`, `slide`, `pop`, `fade`, `float`, `zoom`). |
+| `pos` | `right` | Dock position (`right`, `left`, `top-right`, `top-left`). |
+| `dir` | `up` | Chat flow direction (`up` for bottom-to-top, `down` for top-to-bottom). |
+| `size` | `14` | Base font size in pixels (`11` - `24`). |
+| `emote_size` | `28` | Emote display height in pixels (`20` - `42`). |
+| `dur` | `25` | Message duration in seconds (`0` = never expire / permanent). |
+| `max` | `20` | Maximum messages visible on screen (`5` - `50`). |
+| `avatars`| `1` | Show user profile avatars (`1` = visible, `0` = hidden / compact mode). |
+| `badges` | `1` | Show platform and role badges (`1` or `0`). |
+| `time` | `1` | Show timestamp tags `[HH:MM]` on message cards (`1` or `0`). |
+| `status` | `1` | Show connection status dot (`1` = visible, `0` = hidden). |
+| `sound` | `1` | Enable synthesized audio sound effects (`1` or `0`). |
+| `sound_profile` | `cyber` | Sound profile (`cyber`, `coin`, `chime`, `ping`, `pop`, `mute`). |
+| `volume` | `0.45` | Sound volume from `0.0` to `1.0`. |
+| `avatar` | `https://...` | Fallback avatar or streamer logo URL. |
+| `highlight`| `yourname` | Streamer name to illuminate with an animated golden border. |
+| `filter` | `badword,spam` | Comma-separated banned words to censor/drop. |
+| `accent` | `00f0ff` | Custom primary accent hex color override. |
+| `accent2`| `ff007f` | Custom secondary accent hex color override. |
+| `custom_css`| `.msg{...}` | URL-encoded custom CSS stylesheet overrides. |
+| `secret` | `abc12345` | Security token to authenticate incoming `postMessage` calls. |
+| `demo` | `1` | Run demo mode with simulated chat and events. |
 
-You can also open `overlay.html` directly and pass parameters manually.
+---
 
-## Visual Controls
+## 📺 Adding to OBS Studio / Streamlabs
 
-The overlay includes several presentation options:
+1. Host the project files or deploy to **GitHub Pages**, **Netlify**, or **Vercel**.
+2. Open `index.html` in your browser, configure your channel(s) and theme.
+3. Choose an OBS preset size (e.g. `Sidebar 420 x 850` or `Bottom Bar 850 x 250`).
+4. Click **Copy Overlay URL**.
+5. In OBS Studio: Click **Sources → + → Browser**.
+6. Paste your generated URL into the **URL** field.
+7. Set **Width: 420**, **Height: 850** (matching your preset).
+8. Ensure **Shutdown source when not visible** is unchecked so chat stays connected during scene switches.
+9. Click **OK** — your transparent HUD chat overlay is live! 🎉
 
-- Themes: `neon`, `fire`, `ocean`, `rose`, `glass`, `minimal`, `cyber`, `sunset`, and `mono`.
-- Animations: `slide`, `pop`, `fade`, `float`, and `zoom`.
-- Positioning: `right` or `left`.
-- Font size: 11px to 22px in the setup UI.
-- Message lifetime: 5 to 120 seconds in the setup UI.
-- Visible message limit: 5 to 50 in the setup UI.
+---
 
-## OBS and Streamlabs Setup
+## 🚀 Free 1-Click Hosting Options
 
-The setup page already includes the same basic workflow:
+- **GitHub Pages:** Create a repository, push `index.html` & `overlay.html`, navigate to **Settings → Pages** and enable GitHub Pages.
+- **Netlify Drop:** Drag and drop your project directory at [netlify.com/drop](https://app.netlify.com/drop) for instant hosting with SSL.
+- **Vercel / Cloudflare Pages:** Connect your GitHub repo for automatic edge deployments with zero latency.
 
-1. Host the files somewhere public.
-2. Copy the generated `overlay.html` URL.
-3. Add a Browser Source in OBS or Streamlabs.
-4. Paste the URL.
-5. Set the size you want, then confirm.
+---
 
-Recommended starting point:
+## 📄 License
 
-- Width: `400`
-- Height: `800`
-
-If your scene background does not stay transparent, add this custom CSS in the browser source:
-
-```css
-body { background: transparent !important; }
-```
-
-## Hosting Options
-
-The setup UI suggests several static hosting choices:
-
-- GitHub Pages.
-- Netlify Drop.
-- Vercel.
-- Cloudflare Pages.
-
-Because the project is static, any host that serves HTML files over HTTPS will work.
-
-## Local Testing
-
-You can test locally by opening `index.html` and using the generated preview URL, but some platform integrations may require hosting because of browser security and cross-origin behavior.
-
-For demo-only testing, use the demo mode button or open `overlay.html?demo=1` with your preferred visual settings.
-
-## Known Limitations
-
-- YouTube chat requires a valid API key and a currently active live video.
-- Twitch and Kick connections depend on external services and may reconnect if those services close the connection.
-- Message and event support depends on what each platform sends in the payload.
-- This repository does not include a backend, persistence layer, moderation, or chat logging.
-
-## Implementation Notes
-
-The overlay script is organized around a few core responsibilities:
-
-- URL parameter parsing.
-- Source connection state tracking.
-- Message queueing and batching.
-- Message rendering.
-- Per-platform transport handling.
-- Expiration and cleanup.
-
-That structure keeps the runtime self-contained and makes the overlay easy to host anywhere.
-
-## Practical Workflow
-
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant S as index.html
-  participant O as overlay.html
-  participant P as Platform API
-  participant B as Browser Source
-
-  U->>S: Enter platform info and appearance settings
-  S->>U: Generate overlay URL
-  U->>B: Paste URL into OBS or Streamlabs
-  B->>O: Load overlay page
-  O->>P: Connect to chat service
-  P-->>O: Stream chat messages/events
-  O-->>B: Render overlay cards
-```
-
-## Suggested Usage Pattern
-
-1. Start with Demo Mode to confirm layout.
-2. Pick one platform and verify messages appear.
-3. Add a fallback avatar if your platform image coverage is inconsistent.
-4. Reduce message duration or max messages if the overlay gets crowded.
-5. Switch to another theme or animation if you want a different stream style.
-
-## File Reference
-
-- [index.html](index.html)
-- [overlay.html](overlay.html)
+MIT License © GamingOP69
